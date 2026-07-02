@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import Image from "next/image";
+import QRCode from "qrcode";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { AppShell, Badge, StatePanel } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import { getDashboardData } from "@/lib/services/dashboard";
+import { getFirstTableQrSource } from "@/lib/services/public-ordering";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +42,24 @@ export default async function AppPage() {
   }
 
   const data = result.data;
+  const tableQrSource = await getFirstTableQrSource(data.context.orgId);
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const origin = host ? `${protocol}://${host}` : "http://localhost:3000";
+  const tableQrUrl = tableQrSource
+    ? `${origin}/t/${tableQrSource.tableToken}`
+    : null;
+  const tableQrDataUrl = tableQrUrl
+    ? await QRCode.toDataURL(tableQrUrl, {
+        margin: 1,
+        scale: 5,
+        color: {
+          dark: "#17211b",
+          light: "#ffffff"
+        }
+      })
+    : null;
 
   return (
     <AppShell
@@ -103,6 +125,43 @@ export default async function AppPage() {
                 </li>
               ))}
             </ol>
+          )}
+        </div>
+      </section>
+
+      <section className="border border-[#d7d2c4] bg-white p-5">
+        <div className="grid gap-5 md:grid-cols-[220px_1fr] md:items-center">
+          <div>
+            <h2 className="text-lg font-semibold">Table QR</h2>
+            <p className="mt-2 text-sm leading-6 text-[#667064]">
+              Demonstrate public table ordering with the seeded BrewBite table
+              link. This is pay-at-counter table service, not online payment.
+            </p>
+          </div>
+          {tableQrSource && tableQrDataUrl && tableQrUrl ? (
+            <div className="grid gap-4 sm:grid-cols-[160px_1fr] sm:items-center">
+              <Image
+                alt={`QR code for ${tableQrSource.tableLabel}`}
+                className="h-40 w-40 border border-[#d7d2c4] bg-white p-2"
+                height={160}
+                src={tableQrDataUrl}
+                unoptimized
+                width={160}
+              />
+              <div>
+                <Badge>{tableQrSource.tableLabel}</Badge>
+                <p className="mt-3 break-all border border-[#ebe7dc] bg-[#faf9f4] px-3 py-2 text-sm">
+                  {tableQrUrl}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-[#667064]">
+                  Copy this link if scanning is unavailable.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-[#667064]">
+              Apply the Milestone 4 public QR migration to generate table links.
+            </p>
           )}
         </div>
       </section>
