@@ -15,7 +15,7 @@
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint",
     "db:push": "supabase db push",
-    "seed:brewbite": "node scripts/seed-brewbite.mjs"
+    "seed:brewbite": "node --env-file=.env.local scripts/seed-brewbite.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

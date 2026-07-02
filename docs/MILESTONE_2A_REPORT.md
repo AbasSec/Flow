@@ -51,6 +51,8 @@ Created files:
 - `supabase/migrations/20260702000300_audit_outbox.sql`
 - `supabase/migrations/20260702000400_communication_foundation_rls.sql`
 - `supabase/migrations/20260702000500_fnb_foundation_rls.sql`
+- `supabase/migrations/20260702000600_data_api_privileges.sql`
+- `tests/unit/data-api-grants.test.ts`
 - `tests/unit/access.test.ts`
 - `tests/unit/communication.test.ts`
 - `tests/unit/migrations-static.test.ts`
@@ -81,6 +83,7 @@ No payment, AI, charting, QR, editor, attachment, chat-specific UI, or deploymen
 | 3 | `20260702000300_audit_outbox.sql` | Shared immutable audit and transactional outbox foundation. |
 | 4 | `20260702000400_communication_foundation_rls.sql` | Communication retention, policy acknowledgements, rooms, memberships, messages, reads, work-item threads, review grants/events, communication helper functions, communication RLS. |
 | 5 | `20260702000500_fnb_foundation_rls.sql` | F&B menu, recipe, inventory ledger, table session, order, kitchen station, kitchen ticket foundation and outlet-scoped RLS. |
+| 6 | `20260702000600_data_api_privileges.sql` | Explicit Data API schema/table privileges for `service_role` and narrowly scoped `authenticated` access behind RLS. |
 
 Migration architecture notes:
 
@@ -93,6 +96,18 @@ Migration architecture notes:
 - Orders separate `service_status` from `payment_status`.
 - Direct Work uniqueness uses `participant_set_hash`.
 - No Billplz, payment callback, attachment, mention, reaction, search, export, announcement, handover, incident, task, or AI tables were created.
+
+## Data API Grant Correction
+
+Supabase Data API table exposure requires Postgres privileges in addition to RLS policies. Because automatic Data API exposure is not being relied on, `20260702000600_data_api_privileges.sql` adds explicit forward-only grants:
+
+- `USAGE` on schema `public` only to `authenticated` and `service_role`.
+- `service_role` gets explicit `select`, `insert`, and `update` grants on the Flow application tables created in migrations 001-005, so the server-only seed/admin path can create and upsert demo data.
+- `authenticated` gets select grants that remain constrained by the existing RLS policies.
+- `authenticated` write grants are limited to current P0 communication-policy acknowledgements, plain-text messages, and message read-state.
+- No tenant-table privileges are granted to `anon` or `PUBLIC`.
+
+Grants and RLS are separate layers: grants allow a role to attempt an operation through the Data API, while RLS still decides which rows that role may access. The grant correction does not give Platform Super Admins default tenant access, does not weaken temporary communication review grants, and does not add direct authenticated writes to critical F&B state tables such as orders, inventory ledger, kitchen tickets, or audit events.
 
 ## RLS Rules Implemented
 
@@ -140,6 +155,12 @@ Seed script:
 
 ```bash
 pnpm seed:brewbite
+```
+
+The package script loads `.env.local` for standalone seed runs:
+
+```bash
+node --env-file=.env.local scripts/seed-brewbite.mjs
 ```
 
 Required environment variables:
