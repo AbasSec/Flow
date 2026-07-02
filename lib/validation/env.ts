@@ -37,8 +37,16 @@ export function hasSupabaseBrowserConfig(env: BrowserEnv): boolean {
 
 export function hasSupabaseServerConfig(env: ServerEnv): boolean {
   return Boolean(
-    env.NEXT_PUBLIC_SUPABASE_URL &&
-      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
-      env.SUPABASE_SECRET_KEY
+    env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
+}
+
+export function getSupabaseSecretKey(env: ServerEnv): string {
+  return env.SUPABASE_SECRET_KEY;
+}
+
+export function hasSupabaseAdminConfig(env: ServerEnv): boolean {
+  return Boolean(
+    env.NEXT_PUBLIC_SUPABASE_URL && getSupabaseSecretKey(env)
   );
 }
