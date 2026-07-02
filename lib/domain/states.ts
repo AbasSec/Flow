@@ -63,3 +63,22 @@ export function isKitchenTicketStatus(
 ): value is KitchenTicketStatus {
   return KITCHEN_TICKET_STATUSES.includes(value as KitchenTicketStatus);
 }
+
+export function getNextKitchenTicketStatus(
+  status: KitchenTicketStatus
+): KitchenTicketStatus | null {
+  if (status === "NEW") {
+    return "ACCEPTED";
+  }
+  if (status === "ACCEPTED") {
+    return "PREPARING";
+  }
+  if (status === "PREPARING") {
+    return "READY";
+  }
+  if (status === "READY") {
+    return "COMPLETED";
+  }
+
+  return null;
+}
