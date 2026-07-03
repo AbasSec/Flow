@@ -4,12 +4,16 @@
 
 Before proposing, planning, writing, modifying, testing, or reviewing code, read in this order:
 
-1. `docs/FLOW_DECISION_LOCK_V2.md`
-2. `docs/FLOW_PRD_IMPLEMENTATION.md`
-3. `docs/FLOW_MASTER_CONVERSATION_SOURCE_OF_TRUTH.md`
-4. This file
-5. `CLAUDE.md`
-6. Any existing approved `docs/IMPLEMENTATION_PLAN.md`, API contract, migration notes, or test conventions.
+1. `docs/FLOW_DECISION_LOCK_V3.md`
+2. `docs/FLOW_PRD_V3.md`
+3. `docs/FLOW_V3_IMPLEMENTATION_ROADMAP.md`
+4. `docs/FLOW_V3_TRANSITION_AND_GAP_REPORT.md`
+5. `docs/FLOW_V3_REQUIREMENTS_TRACEABILITY.md`
+6. `docs/FLOW_DECISION_LOCK_V2.md` and older planning documents as historical context only
+7. `docs/FLOW_MASTER_CONVERSATION_SOURCE_OF_TRUTH.md`
+8. This file
+9. `CLAUDE.md`
+10. Any existing approved `docs/IMPLEMENTATION_PLAN.md`, API contract, migration notes, or test conventions.
 
 The Decision Lock is authoritative. Do not silently change a locked requirement because another approach appears easier.
 
@@ -111,7 +115,7 @@ At minimum, cover:
 
 Stop and ask for product-owner direction when:
 
-- A requirement conflicts with Decision Lock v2.
+- A requirement conflicts with Decision Lock v3.
 - A change would add a new industry pack, public community, external messaging channel, or autonomous AI action.
 - A direct-message review, retention, or support-elevation policy is unclear.
 - A payment/inventory/security constraint cannot be implemented safely in the current milestone.

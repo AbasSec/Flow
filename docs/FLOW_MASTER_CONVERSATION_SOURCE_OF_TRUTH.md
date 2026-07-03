@@ -1,14 +1,30 @@
 # FLOW — Master Conversation Source of Truth
 
-> **Purpose:** Working source for the approved Flow direction. It condenses product identity, scope, architecture, safeguards, current repository state, and implementation sequence for the product team and coding agents.  
-> **Status:** Updated after approval of the Flow Core + Flow Connect + Food & Beverage direction on 1 July 2026.  
-> **Precedence:**  
-> 1. `docs/FLOW_DECISION_LOCK_V2.md`  
-> 2. `docs/FLOW_PRD_IMPLEMENTATION.md`  
-> 3. This source file  
-> 4. `AGENTS.md`, `CLAUDE.md`, `README.md`  
+> **Purpose:** Working source for the approved Flow direction. It condenses product identity, scope, architecture, safeguards, current repository state, and implementation sequence for the product team and coding agents.
+> **Status:** Historical working source. V3 supersession note added on 3 July 2026.
+> **Precedence:**
+> 1. `docs/FLOW_DECISION_LOCK_V3.md`
+> 2. `docs/FLOW_PRD_V3.md`
+> 3. `docs/FLOW_V3_IMPLEMENTATION_ROADMAP.md`
+> 4. `docs/FLOW_V3_TRANSITION_AND_GAP_REPORT.md`
+> 5. Historical decision locks, older PRDs, milestone reports, and this source file
+> 6. `AGENTS.md`, `CLAUDE.md`, `README.md` for repository operating rules
 >
-> The Decision Lock wins whenever a conflict exists.
+> V3 wins whenever a conflict exists.
+
+## V3 Supersession Note
+
+This document preserves the historical V2 conversation summary and earlier competition-planning decisions. It should not be deleted or rewritten as if history changed.
+
+For all future product, architecture, roadmap, state-machine, QR/public-ordering, payment/release, menu, employment/payroll, communications, logging, analysis, integration, and implementation-scope decisions, use the V3 documents first:
+
+1. `docs/FLOW_DECISION_LOCK_V3.md`
+2. `docs/FLOW_PRD_V3.md`
+3. `docs/FLOW_V3_IMPLEMENTATION_ROADMAP.md`
+4. `docs/FLOW_V3_TRANSITION_AND_GAP_REPORT.md`
+5. `docs/FLOW_V3_REQUIREMENTS_TRACEABILITY.md`
+
+Older statements in this file that imply table-token QR is the final default public-ordering model, kitchen can own final served/collected state, Billplz/payment gateway is current implementation scope, or V2 is highest precedence are historical and superseded by V3. Current implementation remains a transitional F&B vertical slice, not the final complete Flow architecture.
 
 ---
 
