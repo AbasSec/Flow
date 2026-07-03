@@ -74,18 +74,23 @@ export function PublicMenuClient({
   return (
     <form
       action={formAction}
-      className="space-y-5"
+      className="mt-5 space-y-5"
     >
       <input name="tableToken" type="hidden" value={tableToken} />
       <input name="requestKey" type="hidden" value={requestKey} />
       <input name="items" type="hidden" value={JSON.stringify(cart)} />
 
-      <section className="space-y-5">
+      <section className="space-y-6 pb-2">
         {menu.categories.map((category) => (
           <div key={category.name}>
-            <h2 className="px-1 text-sm font-semibold uppercase tracking-[0.12em] text-[#6c6f5f]">
-              {category.name}
-            </h2>
+            <div className="flex items-center justify-between gap-3 px-1">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#5f675d]">
+                {category.name}
+              </h2>
+              <span className="text-xs text-[#60685f]">
+                {category.items.length} choices
+              </span>
+            </div>
             <div className="mt-3 space-y-3">
               {category.items.map((item) => (
                 <article
@@ -93,7 +98,7 @@ export function PublicMenuClient({
                   key={item.publicMenuToken}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="text-lg font-semibold text-[#17211b]">
                         {item.name}
                       </h3>
@@ -105,12 +110,16 @@ export function PublicMenuClient({
                       {formatSen(item.priceSen)}
                     </p>
                   </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#66785f]">
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <span
+                      className={`text-xs font-semibold uppercase tracking-[0.08em] ${
+                        item.available ? "text-[#527245]" : "text-[#9a3412]"
+                      }`}
+                    >
                       {item.available ? "Available" : "Unavailable"}
                     </span>
                     <button
-                      className="bg-[#17211b] px-4 py-2 text-sm font-semibold text-white disabled:bg-[#a8afa4]"
+                      className="min-h-11 min-w-24 bg-[#17211b] px-4 py-2 text-sm font-semibold text-white outline-none transition hover:bg-[#263128] focus-visible:ring-2 focus-visible:ring-[#17211b] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[#a8afa4]"
                       disabled={!item.available}
                       onClick={() => addItem(item.publicMenuToken)}
                       type="button"
@@ -126,18 +135,21 @@ export function PublicMenuClient({
       </section>
 
       <section className="sticky bottom-0 -mx-4 border-t border-[#d8d1c1] bg-[#f6f4ed]/95 px-4 py-4 backdrop-blur">
-        <div className="rounded-none border border-[#d8d1c1] bg-white p-4">
+        <div className="border border-[#d8d1c1] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold">Your order</h2>
               <p className="mt-1 text-xs text-[#60685f]">
-                Sent to kitchen now. Pay at counter.
+                Sent to the kitchen now. Pay at the counter.
               </p>
             </div>
-            <p className="text-lg font-semibold">{formatSen(displayEstimate)}</p>
+            <div className="text-right">
+              <p className="text-xs text-[#60685f]">{cartItems.length} lines</p>
+              <p className="text-lg font-semibold">{formatSen(displayEstimate)}</p>
+            </div>
           </div>
           {cartItems.length === 0 ? (
-            <p className="mt-4 text-sm text-[#60685f]">
+            <p className="mt-4 border border-dashed border-[#c8c1b1] bg-[#faf9f4] p-3 text-sm text-[#60685f]">
               Add an available item to continue.
             </p>
           ) : (
@@ -147,19 +159,21 @@ export function PublicMenuClient({
                   className="flex items-center justify-between gap-3 text-sm"
                   key={line.publicMenuToken}
                 >
-                  <span>
+                  <span className="min-w-0">
                     {item?.name} × {line.quantity}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
-                      className="border border-[#c8c1b1] px-2 py-1"
+                      aria-label={`Remove one ${item?.name ?? "item"}`}
+                      className="flex h-10 w-10 items-center justify-center border border-[#c8c1b1] text-lg outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
                       onClick={() => removeItem(line.publicMenuToken)}
                       type="button"
                     >
                       -
                     </button>
                     <button
-                      className="border border-[#c8c1b1] px-2 py-1"
+                      aria-label={`Add one ${item?.name ?? "item"}`}
+                      className="flex h-10 w-10 items-center justify-center border border-[#c8c1b1] text-lg outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
                       onClick={() => addItem(line.publicMenuToken)}
                       type="button"
                     >
@@ -185,7 +199,7 @@ export function PublicMenuClient({
             </p>
           ) : null}
           <button
-            className="mt-4 w-full bg-[#66785f] px-4 py-3 text-base font-semibold text-white disabled:bg-[#a8afa4]"
+            className="mt-4 min-h-12 w-full bg-[#66785f] px-4 py-3 text-base font-semibold text-white outline-none transition hover:bg-[#53654c] focus-visible:ring-2 focus-visible:ring-[#17211b] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[#a8afa4]"
             disabled={cart.length === 0 || isPending}
             type="submit"
           >

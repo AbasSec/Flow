@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { AppShell, Badge, StatePanel } from "@/components/flow-ui";
+import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import {
   SETTLEMENT_ROLES,
@@ -40,17 +40,19 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
 
   return (
     <AppShell
-      subtitle="Internal order detail with real order lines, kitchen tickets, inventory-backed state, and linked Flow Connect thread."
-      title={`Order ${order.id.slice(0, 8)}`}
+      subtitle="Internal order record with server-owned lines, kitchen state, settlement status, and work context."
+      title="Order Detail"
     >
       <AutoRefresh intervalMs={5000} />
       <section className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
-          <div className="border border-[#d7d2c4] bg-white p-5">
+          <Surface className="p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm text-[#667064]">
-                  {order.tableLabel ?? "Table service"} ·{" "}
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
+                  {order.tableLabel ?? "Table service"}
+                </p>
+                <p className="mt-2 text-sm text-[#667064]">
                   {new Date(order.createdAt).toLocaleString()}
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">
@@ -58,14 +60,21 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
                 </h2>
               </div>
               <div className="flex gap-2">
-                <Badge>{order.serviceStatus}</Badge>
-                <Badge>{order.paymentStatus}</Badge>
+                <Badge tone={order.serviceStatus === "COMPLETED" ? "success" : "warning"}>
+                  {order.serviceStatus}
+                </Badge>
+                <Badge tone={order.paymentStatus === "PAID" ? "success" : "neutral"}>
+                  {order.paymentStatus}
+                </Badge>
               </div>
             </div>
-          </div>
+          </Surface>
 
-          <div className="border border-[#d7d2c4] bg-white p-5">
-            <h2 className="text-lg font-semibold">Order lines</h2>
+          <Surface className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">Order lines</h2>
+              <span className="text-sm text-[#667064]">{order.lines.length} items</span>
+            </div>
             <div className="mt-4 divide-y divide-[#ebe7dc]">
               {order.lines.map((line) => (
                 <div className="flex justify-between gap-4 py-3 text-sm" key={line.id}>
@@ -79,29 +88,30 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </Surface>
 
-          <div className="border border-[#d7d2c4] bg-white p-5">
+          <Surface className="p-5">
             <h2 className="text-lg font-semibold">Kitchen tickets</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {order.tickets.map((ticket) => (
-                <div className="border border-[#ebe7dc] p-3" key={ticket.id}>
+                <div className="border border-[#ebe7dc] bg-[#faf9f4] p-3" key={ticket.id}>
                   <p className="text-sm font-semibold">{ticket.stationName}</p>
                   <p className="mt-1 text-xs text-[#667064]">
-                    {ticket.id.slice(0, 8)} · {ticket.status}
+                    Ticket {ticket.id.slice(0, 6)} - {ticket.status}
                   </p>
                 </div>
               ))}
             </div>
-          </div>
+          </Surface>
         </div>
 
         <aside className="space-y-5">
           {order.threadRoomId ? (
             <Link
-              className="block border border-[#d7d2c4] bg-white p-5 transition hover:border-[#17211b]"
+              className="block border border-[#d7d2c4] bg-white p-5 shadow-sm outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
               href={`/app/connect?orderId=${order.id}`}
             >
+              <Badge>Work thread</Badge>
               <h2 className="text-lg font-semibold">Flow Connect thread</h2>
               <p className="mt-2 text-sm leading-6 text-[#667064]">
                 Open the order-linked work-item thread. Messages are context
