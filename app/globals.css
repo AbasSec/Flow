@@ -15,8 +15,21 @@ html {
 body {
   min-height: 100%;
   margin: 0;
+  background: #f5f2e9;
   font-family:
     Arial,
     Helvetica,
     sans-serif;
+}
+
+button,
+select,
+textarea,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: #dfe7da;
+  color: #17211b;
 }

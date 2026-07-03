@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Flow Bootstrap",
-  description: "Milestone 1 bootstrap baseline for Flow."
+  title: "Flow for Food & Beverage",
+  description: "Flow competition demo for Food & Beverage operations."
 };
 
 export default function RootLayout({

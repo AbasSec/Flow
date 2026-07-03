@@ -28,13 +28,13 @@ export default async function WaiterPage() {
 
   return (
     <AppShell
-      subtitle="Create a real table-service order from seeded BrewBite tables, menu, recipes, and stock."
+      subtitle="Select a table, build the cart, and send a server-validated order to the kitchen."
       title="Waiter Order Entry"
     >
       <AutoRefresh intervalMs={8000} />
       {tables.length === 0 || menuItems.length === 0 ? (
         <StatePanel title="Empty setup">
-          Seeded tables or menu items are not available yet.
+          Tables or menu items are not available yet.
         </StatePanel>
       ) : (
         <WaiterOrderClient menuItems={menuItems} tables={tables} />

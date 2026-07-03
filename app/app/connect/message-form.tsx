@@ -17,7 +17,7 @@ export function MessageForm({ roomId }: { roomId: string }) {
       <label className="block text-sm font-semibold text-[#344033]">
         Plain-text message
         <textarea
-          className="mt-2 min-h-24 w-full resize-y border border-[#c8c1b1] px-3 py-2 text-base"
+          className="mt-2 min-h-24 w-full resize-y border border-[#c8c1b1] px-3 py-3 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-[#17211b]"
           maxLength={4000}
           name="body"
           placeholder="Coordinate the work. Messages do not change order, stock, ticket, or payment state."
@@ -30,7 +30,7 @@ export function MessageForm({ roomId }: { roomId: string }) {
         </p>
       ) : null}
       <button
-        className="bg-[#17211b] px-4 py-2 text-sm font-semibold text-white disabled:bg-[#aab4a6]"
+        className="min-h-11 bg-[#17211b] px-4 py-2 text-sm font-semibold text-white outline-none transition hover:bg-[#263128] focus-visible:ring-2 focus-visible:ring-[#17211b] focus-visible:ring-offset-2 disabled:bg-[#aab4a6]"
         disabled={isPending}
         type="submit"
       >

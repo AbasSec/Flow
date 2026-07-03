@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { AppShell, Badge, StatePanel } from "@/components/flow-ui";
+import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import { getDashboardData } from "@/lib/services/dashboard";
 import { getFirstTableQrSource } from "@/lib/services/public-ordering";
@@ -20,6 +20,75 @@ function formatAge(minutes: number | null): string {
   }
 
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
+const roleLabels: Record<string, string> = {
+  CASHIER: "Cashier",
+  EMPLOYEE: "Employee",
+  KITCHEN: "Kitchen",
+  MANAGER: "Manager",
+  ORGANISATION_ADMIN: "Admin",
+  ORGANISATION_OWNER: "Owner",
+  STOREKEEPER: "Storekeeper",
+  WAITER: "Waiter"
+};
+
+const statusLabels: Record<string, string> = {
+  ACCEPTED: "Accepted",
+  CANCELLED: "Cancelled",
+  COMPLETED: "Completed",
+  NEW: "New",
+  PAID: "Paid",
+  PREPARING: "Preparing",
+  READY: "Ready",
+  SERVED_OR_COLLECTED: "Served / collected",
+  SUBMITTED: "Submitted",
+  UNPAID: "Unpaid"
+};
+
+const activityLabels: Record<string, string> = {
+  DEMO_MANUAL_SETTLEMENT_RECORDED: "Manual settlement recorded",
+  KITCHEN_TICKET_STATUS_CHANGED: "Kitchen ticket updated",
+  MESSAGE_SENT: "Message sent",
+  ORDER_CREATED: "Order created",
+  QR_TABLE_ORDER_CREATED: "QR table order created"
+};
+
+const objectLabels: Record<string, string> = {
+  audit_events: "Audit trail",
+  communication_rooms: "Flow Connect",
+  inventory_ledger: "Inventory movement",
+  kitchen_tickets: "Kitchen operations",
+  messages: "Flow Connect",
+  orders: "Orders",
+  outbox_events: "Notification event",
+  table_sessions: "Tables"
+};
+
+function humanizeLabel(value: string): string {
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function formatRole(role: string): string {
+  const normalizedRole = role.toUpperCase();
+
+  return roleLabels[normalizedRole] ?? humanizeLabel(role);
+}
+
+function formatStatus(status: string): string {
+  return statusLabels[status] ?? humanizeLabel(status);
+}
+
+function formatActivity(action: string): string {
+  return activityLabels[action] ?? humanizeLabel(action);
+}
+
+function formatObjectType(objectType: string): string {
+  return objectLabels[objectType] ?? humanizeLabel(objectType);
 }
 
 export default async function AppPage() {
@@ -63,26 +132,51 @@ export default async function AppPage() {
 
   return (
     <AppShell
-      subtitle={`${data.context.orgName} live operations. Revenue reflects PAID orders from demo manual settlement only.`}
-      title="Operational Dashboard"
+      subtitle={`${data.context.orgName} live operations. Revenue reflects paid orders recorded through manual counter settlement.`}
+      title="Command Center"
     >
       <AutoRefresh />
-      <section className="grid gap-3 md:grid-cols-5">
-        <MetricCard label="Today's orders" value={data.todayOrderCount} />
-        <MetricCard label="Demo paid revenue" value={formatSen(data.todayRevenueSen)} />
-        <MetricCard label="Open tickets" value={data.openKitchenTickets} />
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard
+          detail="Orders committed today"
+          label="Today's orders"
+          value={data.todayOrderCount}
+        />
+        <MetricCard
+          detail="Pay-at-counter settlements"
+          label="Paid revenue"
+          value={formatSen(data.todayRevenueSen)}
+        />
+        <MetricCard
+          detail="Kitchen work in progress"
+          label="Open tickets"
+          tone={data.openKitchenTickets > 0 ? "warning" : "neutral"}
+          value={data.openKitchenTickets}
+        />
+        <MetricCard
+          detail="Longest active kitchen wait"
           label="Oldest open ticket"
+          tone={data.oldestOpenTicketAgeMinutes ? "warning" : "neutral"}
           value={formatAge(data.oldestOpenTicketAgeMinutes)}
         />
-        <MetricCard label="Stock risks" value={data.lowStockCount} />
+        <MetricCard
+          detail="Ingredients needing attention"
+          label="Stock risks"
+          tone={data.lowStockCount > 0 ? "danger" : "success"}
+          value={data.lowStockCount}
+        />
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="border border-[#d7d2c4] bg-white p-5">
+        <Surface className="p-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Recent orders</h2>
-            <Badge>{data.context.role}</Badge>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
+                Order flow
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">Recent orders</h2>
+            </div>
+            <RoleBadge>{formatRole(data.context.role)}</RoleBadge>
           </div>
           {data.recentOrders.length === 0 ? (
             <p className="mt-4 text-sm text-[#667064]">
@@ -92,23 +186,28 @@ export default async function AppPage() {
             <div className="mt-4 divide-y divide-[#ebe7dc]">
               {data.recentOrders.map((order) => (
                 <Link
-                  className="grid gap-2 py-3 text-sm transition hover:bg-[#faf9f4] sm:grid-cols-[1fr_auto_auto]"
+                  className="grid gap-2 px-2 py-3 text-sm outline-none transition hover:bg-[#faf9f4] focus-visible:ring-2 focus-visible:ring-[#17211b] sm:grid-cols-[1fr_auto_auto]"
                   href={`/app/orders/${order.id}`}
                   key={order.id}
                 >
                   <span className="font-semibold">
-                    {order.tableLabel ?? "Table"} · {order.id.slice(0, 8)}
+                    {order.tableLabel ?? "Table service"}
                   </span>
-                  <span>{order.serviceStatus}</span>
+                  <span className="text-[#667064]">
+                    {formatStatus(order.serviceStatus)}
+                  </span>
                   <span className="font-semibold">{formatSen(order.totalSen)}</span>
                 </Link>
               ))}
             </div>
           )}
-        </div>
+        </Surface>
 
-        <div className="border border-[#d7d2c4] bg-white p-5">
-          <h2 className="text-lg font-semibold">Activity timeline</h2>
+        <Surface className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
+            Evidence trail
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">Activity timeline</h2>
           {data.recentActivity.length === 0 ? (
             <p className="mt-4 text-sm text-[#667064]">
               Audit activity appears here after orders, kitchen transitions,
@@ -118,64 +217,107 @@ export default async function AppPage() {
             <ol className="mt-4 space-y-3">
               {data.recentActivity.map((event) => (
                 <li className="border-l-2 border-[#6f7f66] pl-3" key={event.id}>
-                  <p className="text-sm font-semibold">{event.action}</p>
+                  <p className="text-sm font-semibold">
+                    {formatActivity(event.action)}
+                  </p>
                   <p className="text-xs text-[#667064]">
-                    {event.objectType} · {new Date(event.createdAt).toLocaleTimeString()}
+                    {formatObjectType(event.objectType)} -{" "}
+                    {new Date(event.createdAt).toLocaleTimeString()}
                   </p>
                 </li>
               ))}
             </ol>
           )}
-        </div>
+        </Surface>
       </section>
 
-      <section className="border border-[#d7d2c4] bg-white p-5">
-        <div className="grid gap-5 md:grid-cols-[220px_1fr] md:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Table QR</h2>
-            <p className="mt-2 text-sm leading-6 text-[#667064]">
-              Demonstrate public table ordering with the seeded BrewBite table
-              link. This is pay-at-counter table service, not online payment.
+      <Surface className="overflow-hidden">
+        <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="bg-[#17211b] p-5 text-white sm:p-6">
+            <Badge tone="dark">Public table ordering</Badge>
+            <h2 className="mt-4 text-2xl font-semibold">Table QR</h2>
+            <p className="mt-3 text-sm leading-6 text-[#dfe7da]">
+              Scan to open the customer menu for one BrewBite table. Orders are
+              sent to the kitchen and paid at the counter.
             </p>
           </div>
-          {tableQrSource && tableQrDataUrl && tableQrUrl ? (
-            <div className="grid gap-4 sm:grid-cols-[160px_1fr] sm:items-center">
-              <Image
-                alt={`QR code for ${tableQrSource.tableLabel}`}
-                className="h-40 w-40 border border-[#d7d2c4] bg-white p-2"
-                height={160}
-                src={tableQrDataUrl}
-                unoptimized
-                width={160}
-              />
-              <div>
-                <Badge>{tableQrSource.tableLabel}</Badge>
-                <p className="mt-3 break-all border border-[#ebe7dc] bg-[#faf9f4] px-3 py-2 text-sm">
-                  {tableQrUrl}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-[#667064]">
-                  Copy this link if scanning is unavailable.
-                </p>
+          <div>
+            {tableQrSource && tableQrDataUrl && tableQrUrl ? (
+              <div className="grid gap-5 p-5 sm:grid-cols-[176px_1fr] sm:items-center sm:p-6">
+                <Image
+                  alt={`QR code for ${tableQrSource.tableLabel}`}
+                  className="h-44 w-44 border border-[#d7d2c4] bg-white p-2 shadow-sm"
+                  height={176}
+                  src={tableQrDataUrl}
+                  unoptimized
+                  width={176}
+                />
+                <div className="min-w-0">
+                  <Badge tone="success">{tableQrSource.tableLabel}</Badge>
+                  <p className="mt-3 text-sm font-semibold text-[#344033]">
+                    Open customer menu
+                  </p>
+                  <a
+                    className="mt-2 inline-flex min-h-11 max-w-full items-center border border-[#ebe7dc] bg-[#faf9f4] px-3 py-2 text-sm font-semibold text-[#263128] outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
+                    href={tableQrUrl}
+                  >
+                    <span className="truncate">Open table link</span>
+                  </a>
+                  <p className="mt-3 text-xs leading-5 text-[#667064]">
+                    Use the QR code for the live demo, or open the link on this
+                    device if scanning is unavailable. The public page shows
+                    only safe table, menu, and pay-at-counter context.
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-[#667064]">
-              Apply the Milestone 4 public QR migration to generate table links.
-            </p>
-          )}
+            ) : (
+              <p className="p-5 text-sm text-[#667064] sm:p-6">
+                Table QR links will appear here after the public QR migration is
+                approved and applied.
+              </p>
+            )}
+          </div>
         </div>
-      </section>
+      </Surface>
     </AppShell>
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string | number }) {
+function MetricCard({
+  detail,
+  label,
+  value,
+  tone = "neutral"
+}: {
+  detail: string;
+  label: string;
+  value: string | number;
+  tone?: "neutral" | "success" | "warning" | "danger";
+}) {
+  const accent =
+    tone === "success"
+      ? "border-l-[#73936a]"
+      : tone === "warning"
+        ? "border-l-[#d6a751]"
+        : tone === "danger"
+          ? "border-l-[#d98a76]"
+          : "border-l-[#66785f]";
+
   return (
-    <div className="border border-[#d7d2c4] bg-white p-4">
+    <div className={`border border-l-4 border-[#d7d2c4] bg-white p-4 shadow-sm ${accent}`}>
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
         {label}
       </p>
       <p className="mt-3 text-2xl font-semibold text-[#17211b]">{value}</p>
+      <p className="mt-2 text-xs leading-5 text-[#667064]">{detail}</p>
     </div>
+  );
+}
+
+function RoleBadge({ children }: { children: string }) {
+  return (
+    <span className="inline-flex items-center border border-[#c8c1b1] bg-[#faf9f4] px-2.5 py-1 text-xs font-semibold text-[#4a5549]">
+      {children}
+    </span>
   );
 }
