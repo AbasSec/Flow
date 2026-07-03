@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </p>
         <h1 className="text-3xl font-semibold tracking-normal">Sign in</h1>
         <p className="mt-3 text-sm leading-6 text-[#4b5563]">
-          Use a Supabase email and password account prepared by the demo seed.
+          Use your authorised Flow workspace email and password.
         </p>
         {params.error ? (
           <p className="mt-5 border border-[#c2410c] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
@@ -53,9 +53,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </button>
         </form>
         <p className="mt-5 text-xs leading-5 text-[#6b7280]">
-          Authentication is limited to Supabase session handling and active
-          membership checks. Business screens are not implemented in this
-          milestone.
+          Access is limited to active organisation members with an authorised
+          Flow account.
         </p>
       </section>
     </main>
