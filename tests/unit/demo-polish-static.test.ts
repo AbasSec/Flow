@@ -20,6 +20,28 @@ const routeSource = routeFiles
   .join("\n");
 
 describe("demo polish presentation boundaries", () => {
+  it("keeps the login page free of prototype and implementation wording", () => {
+    const loginPage = readFileSync(
+      join(process.cwd(), "app", "login", "page.tsx"),
+      "utf8"
+    );
+    const lowerLoginPage = loginPage.toLowerCase();
+
+    expect(loginPage).toContain(
+      "Use your authorised Flow workspace email and password."
+    );
+    expect(loginPage).toContain(
+      "Access is limited to active organisation members with an authorised"
+    );
+    expect(loginPage).toContain("Flow account.");
+    expect(lowerLoginPage).not.toContain("supabase");
+    expect(lowerLoginPage).not.toContain("seed");
+    expect(lowerLoginPage).not.toContain("milestone");
+    expect(lowerLoginPage).not.toContain("bootstrap");
+    expect(lowerLoginPage).not.toContain("prototype");
+    expect(lowerLoginPage).not.toContain("demo");
+  });
+
   it("keeps the root page free of milestone and bootstrap wording", () => {
     const rootPage = readFileSync(join(process.cwd(), "app", "page.tsx"), "utf8");
 
