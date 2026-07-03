@@ -37,7 +37,13 @@ export type PublicTableMenu = {
 };
 
 export type PublicOrderStatus = {
-  status: "ACCEPTED" | "PREPARING" | "READY" | "SERVED" | "COLLECTED" | "UNAVAILABLE";
+  status:
+    | "ORDER_RECEIVED"
+    | "ACCEPTED"
+    | "PREPARING"
+    | "READY"
+    | "ORDER_COMPLETE"
+    | "UNAVAILABLE";
   tableLabel: string | null;
   submittedAt: string;
   paymentLabel: string;
@@ -67,7 +73,7 @@ type PublicMenuRpc = {
 
 type PublicStatusRpc = {
   found?: boolean;
-  status?: PublicOrderStatus["status"];
+  status?: string;
   table_label?: string | null;
   submitted_at?: string;
   payment_label?: string;
@@ -202,7 +208,7 @@ export async function getPublicOrderStatus(
     return {
       ok: true,
       data: {
-        status: status.status,
+        status: normalizePublicStatus(status.status),
         tableLabel: status.table_label ?? null,
         submittedAt: status.submitted_at,
         paymentLabel: status.payment_label ?? "Pay at counter"
@@ -213,15 +219,42 @@ export async function getPublicOrderStatus(
   }
 }
 
+function normalizePublicStatus(status: string): PublicOrderStatus["status"] {
+  if (
+    status === "ORDER_RECEIVED" ||
+    status === "ACCEPTED" ||
+    status === "PREPARING" ||
+    status === "READY" ||
+    status === "ORDER_COMPLETE" ||
+    status === "UNAVAILABLE"
+  ) {
+    return status;
+  }
+
+  if (
+    status === "SERVED" ||
+    status === "COLLECTED" ||
+    status === "SERVED_OR_COLLECTED" ||
+    status === "COMPLETED"
+  ) {
+    return "ORDER_COMPLETE";
+  }
+
+  return "UNAVAILABLE";
+}
+
 export async function getFirstTableQrSource(
   orgId: string
 ): Promise<TableQrSource | null> {
   const admin = requireAdminClient();
   const { data, error } = await admin
     .from("table_sessions")
-    .select("table_label, public_table_token")
+    .select("table_label, public_table_token, public_token_expires_at")
     .eq("org_id", orgId)
+    .in("status", ["AVAILABLE", "OPEN"])
     .not("public_table_token", "is", null)
+    .not("public_token_expires_at", "is", null)
+    .gt("public_token_expires_at", new Date().toISOString())
     .order("table_label")
     .limit(1)
     .maybeSingle();
@@ -230,9 +263,13 @@ export async function getFirstTableQrSource(
     throw error;
   }
 
-  const row = data as { table_label: string; public_table_token: string | null } | null;
+  const row = data as {
+    table_label: string;
+    public_table_token: string | null;
+    public_token_expires_at: string | null;
+  } | null;
 
-  if (!row?.public_table_token) {
+  if (!isValidPublicTableToken(row?.public_table_token)) {
     return null;
   }
 
@@ -240,4 +277,8 @@ export async function getFirstTableQrSource(
     tableLabel: row.table_label,
     tableToken: row.public_table_token
   };
+}
+
+function isValidPublicTableToken(token: string | null | undefined): token is string {
+  return Boolean(token && /^[A-Za-z0-9_-]{32,128}$/.test(token));
 }

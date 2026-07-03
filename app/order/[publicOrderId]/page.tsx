@@ -9,14 +9,28 @@ type OrderStatusPageProps = {
 };
 
 const statusCopy = {
+  ORDER_RECEIVED: "Your order has been sent to the kitchen.",
   ACCEPTED: "Your order was accepted and sent to the kitchen.",
   PREPARING: "The kitchen is preparing your order.",
   READY: "Your order is ready. Please check with the counter.",
-  SERVED: "Your order has been served.",
-  COLLECTED: "Your order has been collected.",
+  ORDER_COMPLETE: "Your order is complete. Thank you.",
   UNAVAILABLE: "This order cannot be completed. Please ask the counter."
 } as const;
-const visibleSteps = ["ACCEPTED", "PREPARING", "READY", "SERVED", "COLLECTED"] as const;
+const statusLabels = {
+  ORDER_RECEIVED: "Order received",
+  ACCEPTED: "Accepted",
+  PREPARING: "Preparing",
+  READY: "Ready",
+  ORDER_COMPLETE: "Order complete",
+  UNAVAILABLE: "Unavailable"
+} as const;
+const visibleSteps = [
+  "ORDER_RECEIVED",
+  "ACCEPTED",
+  "PREPARING",
+  "READY",
+  "ORDER_COMPLETE"
+] as const;
 
 export default async function PublicOrderStatusPage({
   params
@@ -45,7 +59,7 @@ export default async function PublicOrderStatusPage({
             BrewBite Kitchen
           </p>
           <h1 className="mt-3 text-3xl font-semibold">
-            {formatPublicStatus(status.status)}
+            {statusLabels[status.status]}
           </h1>
           <p className="mt-3 text-base leading-7 text-[#dfe7da]">
             {statusCopy[status.status]}
@@ -141,14 +155,10 @@ function StatusSteps({ currentStatus }: { currentStatus: keyof typeof statusCopy
             >
               {index + 1}
             </span>
-            <span className="font-semibold">{formatPublicStatus(step)}</span>
+            <span className="font-semibold">{statusLabels[step]}</span>
           </li>
         );
       })}
     </ol>
   );
-}
-
-function formatPublicStatus(status: string): string {
-  return status.charAt(0) + status.slice(1).toLowerCase();
 }
