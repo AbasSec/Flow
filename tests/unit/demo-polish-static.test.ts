@@ -63,8 +63,8 @@ describe("demo polish presentation boundaries", () => {
     expect(dashboard).toContain(
       "KITCHEN_TICKET_STATUS_CHANGED: \"Kitchen ticket updated\""
     );
-    expect(dashboard).toContain("SERVED_OR_COLLECTED: \"Served / collected\"");
-    expect(dashboard).toContain("COMPLETED: \"Completed\"");
+    expect(dashboard).toContain("SERVED_OR_COLLECTED: \"Order complete\"");
+    expect(dashboard).toContain("COMPLETED: \"Order complete\"");
     expect(dashboard).toContain("kitchen_tickets: \"Kitchen operations\"");
     expect(dashboard).toContain("<RoleBadge>{formatRole(data.context.role)}</RoleBadge>");
     expect(dashboard).toContain("function RoleBadge");

@@ -16,6 +16,27 @@ type OrderPageProps = {
   params: Promise<{ id: string }>;
 };
 
+const orderStatusLabels: Record<string, string> = {
+  ACCEPTED: "Accepted",
+  CANCELLED: "Cancelled",
+  COMPLETED: "Order complete",
+  NEW: "New",
+  PAID: "Paid",
+  PREPARING: "Preparing",
+  READY: "Ready",
+  SERVED_OR_COLLECTED: "Order complete",
+  SUBMITTED: "Submitted",
+  UNPAID: "Unpaid"
+};
+
+function formatOrderStatus(status: string): string {
+  return orderStatusLabels[status] ?? status;
+}
+
+function isTerminalOrderStatus(status: string): boolean {
+  return status === "SERVED_OR_COLLECTED" || status === "COMPLETED";
+}
+
 export default async function OrderDetailPage({ params }: OrderPageProps) {
   const { id } = await params;
   const result = await getOrderDetail(id);
@@ -60,11 +81,11 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
                 </h2>
               </div>
               <div className="flex gap-2">
-                <Badge tone={order.serviceStatus === "COMPLETED" ? "success" : "warning"}>
-                  {order.serviceStatus}
+                <Badge tone={isTerminalOrderStatus(order.serviceStatus) ? "success" : "warning"}>
+                  {formatOrderStatus(order.serviceStatus)}
                 </Badge>
                 <Badge tone={order.paymentStatus === "PAID" ? "success" : "neutral"}>
-                  {order.paymentStatus}
+                  {formatOrderStatus(order.paymentStatus)}
                 </Badge>
               </div>
             </div>
@@ -97,7 +118,7 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
                 <div className="border border-[#ebe7dc] bg-[#faf9f4] p-3" key={ticket.id}>
                   <p className="text-sm font-semibold">{ticket.stationName}</p>
                   <p className="mt-1 text-xs text-[#667064]">
-                    Ticket {ticket.id.slice(0, 6)} - {ticket.status}
+                    Ticket {ticket.id.slice(0, 6)} - {formatOrderStatus(ticket.status)}
                   </p>
                 </div>
               ))}

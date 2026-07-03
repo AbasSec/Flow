@@ -9,6 +9,7 @@ import { getDashboardData } from "@/lib/services/dashboard";
 import { getFirstTableQrSource } from "@/lib/services/public-ordering";
 
 export const dynamic = "force-dynamic";
+const PRODUCTION_PUBLIC_ORIGIN = "https://flow-ops-rho.vercel.app";
 
 function formatAge(minutes: number | null): string {
   if (minutes === null) {
@@ -36,12 +37,12 @@ const roleLabels: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   ACCEPTED: "Accepted",
   CANCELLED: "Cancelled",
-  COMPLETED: "Completed",
+  COMPLETED: "Order complete",
   NEW: "New",
   PAID: "Paid",
   PREPARING: "Preparing",
   READY: "Ready",
-  SERVED_OR_COLLECTED: "Served / collected",
+  SERVED_OR_COLLECTED: "Order complete",
   SUBMITTED: "Submitted",
   UNPAID: "Unpaid"
 };
@@ -91,6 +92,26 @@ function formatObjectType(objectType: string): string {
   return objectLabels[objectType] ?? humanizeLabel(objectType);
 }
 
+function getTrustedPublicOrigin(requestHeaders: { get(name: string): string | null }): string {
+  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (configuredOrigin && URL.canParse(configuredOrigin)) {
+    return new URL(configuredOrigin).origin;
+  }
+
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+  if (host?.startsWith("localhost") || host?.startsWith("127.0.0.1")) {
+    return `http://${host}`;
+  }
+
+  return PRODUCTION_PUBLIC_ORIGIN;
+}
+
+function isValidPublicTableToken(token: string | null | undefined): token is string {
+  return Boolean(token && /^[A-Za-z0-9_-]{32,128}$/.test(token));
+}
+
 export default async function AppPage() {
   const result = await getDashboardData();
 
@@ -113,10 +134,8 @@ export default async function AppPage() {
   const data = result.data;
   const tableQrSource = await getFirstTableQrSource(data.context.orgId);
   const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
-  const origin = host ? `${protocol}://${host}` : "http://localhost:3000";
-  const tableQrUrl = tableQrSource
+  const origin = getTrustedPublicOrigin(requestHeaders);
+  const tableQrUrl = isValidPublicTableToken(tableQrSource?.tableToken)
     ? `${origin}/t/${tableQrSource.tableToken}`
     : null;
   const tableQrDataUrl = tableQrUrl
