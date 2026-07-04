@@ -39,8 +39,8 @@ export default async function KitchenPage() {
       <AutoRefresh intervalMs={5000} />
       {board.tickets.length === 0 ? (
         <StatePanel title="No open tickets">
-          New table and QR orders will appear here after they are accepted by
-          the server.
+          Staff table orders appear after server validation. QR pay-at-counter
+          orders appear only after authorised settlement and kitchen release.
         </StatePanel>
       ) : (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

@@ -9,7 +9,7 @@ type OrderStatusPageProps = {
 };
 
 const statusCopy = {
-  ORDER_RECEIVED: "Your order has been sent to the kitchen.",
+  ORDER_RECEIVED: "Order received — please pay at counter.",
   ACCEPTED: "Your order was accepted and sent to the kitchen.",
   PREPARING: "The kitchen is preparing your order.",
   READY: "Your order is ready. Please check with the counter.",

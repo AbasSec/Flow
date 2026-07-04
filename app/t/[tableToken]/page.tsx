@@ -35,8 +35,8 @@ export default async function PublicTablePage({ params }: TablePageProps) {
         </div>
         <div className="grid gap-4 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
           <p className="text-sm leading-6 text-[#60685f]">
-            Choose your items, send the order to the kitchen, and pay at the
-            counter when you are ready.
+            Choose your items, send the order to staff, and pay at the
+            counter before kitchen preparation starts.
           </p>
           <div className="border border-[#d8d1c1] bg-[#faf9f4] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#66785f]">
             Pay at counter
