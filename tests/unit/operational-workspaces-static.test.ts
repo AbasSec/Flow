@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  hasExplicitActiveSiteMembership,
+  hasOrganisationWideOutletAccess
+} from "@/lib/services/outlet-access-policy";
 
 const counterService = readFileSync(
   join(process.cwd(), "lib", "services", "counter.ts"),
@@ -58,6 +62,10 @@ const contextService = readFileSync(
   join(process.cwd(), "lib", "services", "context.ts"),
   "utf8"
 );
+const outletAccessPolicy = readFileSync(
+  join(process.cwd(), "lib", "services", "outlet-access-policy.ts"),
+  "utf8"
+);
 const proxySrc = readFileSync(join(process.cwd(), "proxy.ts"), "utf8");
 const kitchenPage = readFileSync(
   join(process.cwd(), "app", "app", "kitchen", "page.tsx"),
@@ -88,6 +96,52 @@ describe("Counter workspace access control", () => {
     expect(contextService).toContain("getPrimaryAuthorisedOutletId");
     expect(contextService).toContain("site_memberships");
     expect(contextService).toContain("hasOrganisationWideOutletAccess");
+    expect(contextService).toContain("hasExplicitActiveSiteMembership");
+    expect(ordersSvc).toContain("canAccessOutlet(context, order.outlet_id)");
+  });
+});
+
+describe("Outlet access policy", () => {
+  it("grants organisation-wide outlet access only to Owner and Organisation Admin", () => {
+    expect(hasOrganisationWideOutletAccess("organisation_owner")).toBe(true);
+    expect(hasOrganisationWideOutletAccess("organisation_admin")).toBe(true);
+
+    for (const role of ["manager", "cashier", "waiter", "kitchen", "storekeeper"]) {
+      expect(hasOrganisationWideOutletAccess(role)).toBe(false);
+    }
+
+    expect(outletAccessPolicy).toContain('role === "organisation_owner"');
+    expect(outletAccessPolicy).toContain('role === "organisation_admin"');
+    expect(outletAccessPolicy).not.toContain('role === "manager"');
+    expect(outletAccessPolicy).not.toContain('role === "cashier"');
+    expect(outletAccessPolicy).not.toContain('role === "waiter"');
+    expect(outletAccessPolicy).not.toContain('role === "kitchen"');
+    expect(outletAccessPolicy).not.toContain('role === "storekeeper"');
+  });
+
+  it("requires explicit active site membership for non-owner/admin outlet access", () => {
+    expect(hasExplicitActiveSiteMembership("user-a", [])).toBe(false);
+    expect(hasExplicitActiveSiteMembership("user-a", [{ user_id: "user-b" }])).toBe(false);
+    expect(
+      hasExplicitActiveSiteMembership("user-a", [
+        { user_id: "user-b" },
+        { user_id: "user-a" }
+      ])
+    ).toBe(true);
+  });
+
+  it("does not preserve an empty-site-membership legacy compatibility bypass", () => {
+    expect(contextService).not.toContain("activeMemberships.length === 0");
+    expect(contextService).not.toContain("activeMemberships.length === 0) {\n    return true;");
+    expect(contextService).toContain(
+      "return hasExplicitActiveSiteMembership(context.userId, activeMemberships);"
+    );
+  });
+
+  it("keeps Counter, Floor & Service, and Order Detail behind the exact outlet guard", () => {
+    expect(counterService).toContain("getPrimaryAuthorisedOutletId(context)");
+    expect(ordersSvc).toContain("getPrimaryAuthorisedOutletId(context)");
+    expect(ordersSvc).toContain("canAccessOutlet(context, outletId)");
     expect(ordersSvc).toContain("canAccessOutlet(context, order.outlet_id)");
   });
 });

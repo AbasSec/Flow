@@ -6,6 +6,12 @@ import {
   getActiveMembershipForCurrentUser,
   getAuthenticatedUser
 } from "@/lib/auth/session";
+import {
+  hasExplicitActiveSiteMembership,
+  hasOrganisationWideOutletAccess
+} from "@/lib/services/outlet-access-policy";
+
+export { hasOrganisationWideOutletAccess } from "@/lib/services/outlet-access-policy";
 
 export const MANAGEMENT_ROLES = [
   "organisation_owner",
@@ -57,10 +63,6 @@ export type ServiceResult<T> =
 
 export function roleIn(role: string, allowed: readonly string[]): boolean {
   return allowed.includes(role);
-}
-
-export function hasOrganisationWideOutletAccess(role: string): boolean {
-  return role === "organisation_owner" || role === "organisation_admin";
 }
 
 export async function requireWorkspaceContext(): Promise<WorkspaceContext> {
@@ -166,11 +168,7 @@ export async function canAccessOutlet(
 
   const activeMemberships = (memberships ?? []) as SiteMembershipRow[];
 
-  if (activeMemberships.length === 0) {
-    return true;
-  }
-
-  return activeMemberships.some((membership) => membership.user_id === context.userId);
+  return hasExplicitActiveSiteMembership(context.userId, activeMemberships);
 }
 
 export async function getPrimaryAuthorisedOutletId(

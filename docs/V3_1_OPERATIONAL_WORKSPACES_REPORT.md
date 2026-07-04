@@ -4,6 +4,8 @@
 **Date:** 2026-07-04
 **Status:** Ready for review after remediation
 
+**Pre-merge security remediation:** Outlet-scoped private reads were tightened so an empty site-membership set is never treated as proof of authority for non-owner/admin roles.
+
 ## Scope Completed
 
 This milestone adds two focused V3.1 operational workspaces on top of the completed Lifecycle Kernel:
@@ -68,8 +70,9 @@ The remediation added shared server-side read guards in `lib/services/context.ts
 These mirror the V3.1 database mutation model:
 
 - Organisation Owner and Organisation Admin may read across the active organisation outlet scope.
-- Manager, Cashier, Waiter, Kitchen, and Storekeeper require active site/outlet authority.
-- Legacy demo compatibility is preserved when a site has no active site-membership rows.
+- Manager, Cashier, Waiter, Kitchen, and Storekeeper require explicit active site/outlet authority for the target outlet.
+- If the target site has no active site-membership rows, non-owner/admin access is denied.
+- If active site memberships exist but belong only to other users, non-owner/admin access is denied.
 
 Counter, Floor & Service, Dashboard, Kitchen manager reads, and Order Detail now route operational reads through an authorised outlet before returning outlet-scoped records. Order Detail returns a safe not-found response for orders outside the actor's authorised outlet and only loads related lines/tickets/thread data after the outlet guard passes.
 
