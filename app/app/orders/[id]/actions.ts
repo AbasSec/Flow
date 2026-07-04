@@ -9,6 +9,7 @@ import {
 
 export type SettlementActionState = {
   message: string;
+  ok?: boolean;
 };
 
 export async function demoSettlementAction(
@@ -22,8 +23,10 @@ export async function demoSettlementAction(
     return { message: result.message };
   }
 
+  revalidatePath("/app");
+  revalidatePath("/app/counter");
   revalidatePath(`/app/orders/${orderId}`);
-  return { message: "Demo manual settlement recorded." };
+  return { message: "Demo manual settlement recorded.", ok: true };
 }
 
 export async function releaseToKitchenAction(
@@ -38,8 +41,10 @@ export async function releaseToKitchenAction(
   }
 
   revalidatePath("/app/kitchen");
+  revalidatePath("/app/counter");
+  revalidatePath("/app");
   revalidatePath(`/app/orders/${orderId}`);
-  return { message: "Order released to kitchen." };
+  return { message: "Order released to kitchen.", ok: true };
 }
 
 export async function markServedAction(
@@ -54,6 +59,8 @@ export async function markServedAction(
   }
 
   revalidatePath("/app");
+  revalidatePath("/app/waiter");
+  revalidatePath("/app/kitchen");
   revalidatePath(`/app/orders/${orderId}`);
-  return { message: "Order marked served." };
+  return { message: "Order marked served.", ok: true };
 }

@@ -1,15 +1,29 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+const COUNTER_VISIBLE_ROLES = new Set([
+  "organisation_owner",
+  "organisation_admin",
+  "manager",
+  "cashier"
+]);
+
 export function AppShell({
   title,
   subtitle,
-  children
+  children,
+  role,
+  reserveCounterSlot = false
 }: {
   title: string;
   subtitle: string;
   children: ReactNode;
+  role?: string;
+  reserveCounterSlot?: boolean;
 }) {
+  const showCounter = Boolean(role && COUNTER_VISIBLE_ROLES.has(role));
+  const showCounterPlaceholder = !showCounter && reserveCounterSlot;
+
   return (
     <main className="min-h-screen bg-[#f5f2e9] text-[#17211b]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:px-8">
@@ -35,7 +49,9 @@ export function AppShell({
             className="mt-5 grid grid-cols-2 gap-2 text-sm font-semibold sm:flex sm:flex-wrap"
           >
             <NavLink href="/app">Dashboard</NavLink>
-            <NavLink href="/app/waiter">Waiter</NavLink>
+            {showCounter && <NavLink href="/app/counter">Counter</NavLink>}
+            {showCounterPlaceholder && <CounterNavPlaceholder />}
+            <NavLink href="/app/waiter">Floor & Service</NavLink>
             <NavLink href="/app/kitchen">Kitchen</NavLink>
             <NavLink href="/app/connect">Connect</NavLink>
           </nav>
@@ -43,6 +59,17 @@ export function AppShell({
         {children}
       </div>
     </main>
+  );
+}
+
+function CounterNavPlaceholder() {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex min-h-11 items-center justify-center border border-[#d7d2c4] bg-[#ece7da] px-4 py-2 shadow-sm"
+    >
+      <span className="h-3 w-16 bg-[#d7d2c4]" />
+    </span>
   );
 }
 

@@ -6,7 +6,10 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import { getDashboardData } from "@/lib/services/dashboard";
-import { getOutletLifecycleMode } from "@/lib/services/orders";
+import {
+  getOutletLifecycleModeForContext,
+  type OrderSummary
+} from "@/lib/services/orders";
 import { getFirstTableQrSource } from "@/lib/services/public-ordering";
 import { LifecycleActivationPanel } from "./lifecycle-panel";
 
@@ -136,7 +139,7 @@ export default async function AppPage() {
   const data = result.data;
   const outletLifecycle =
     data.context.role === "organisation_owner"
-      ? await getOutletLifecycleMode(data.context.orgId).then((r) =>
+      ? await getOutletLifecycleModeForContext(data.context).then((r) =>
           r.ok ? r.data : null
         )
       : null;
@@ -159,6 +162,7 @@ export default async function AppPage() {
 
   return (
     <AppShell
+      role={data.context.role}
       subtitle={`${data.context.orgName} live operations. Revenue reflects paid orders recorded through manual counter settlement.`}
       title="Command Center"
     >
@@ -207,25 +211,38 @@ export default async function AppPage() {
           </div>
           {data.recentOrders.length === 0 ? (
             <p className="mt-4 text-sm text-[#667064]">
-              No orders yet. Create one from the Waiter view.
+              No orders yet. Create one from Floor & Service.
             </p>
           ) : (
             <div className="mt-4 divide-y divide-[#ebe7dc]">
-              {data.recentOrders.map((order) => (
-                <Link
-                  className="grid gap-2 px-2 py-3 text-sm outline-none transition hover:bg-[#faf9f4] focus-visible:ring-2 focus-visible:ring-[#17211b] sm:grid-cols-[1fr_auto_auto]"
-                  href={`/app/orders/${order.id}`}
-                  key={order.id}
-                >
-                  <span className="font-semibold">
-                    {order.tableLabel ?? "Table service"}
-                  </span>
-                  <span className="text-[#667064]">
-                    {formatStatus(order.serviceStatus)}
-                  </span>
-                  <span className="font-semibold">{formatSen(order.totalSen)}</span>
-                </Link>
-              ))}
+              {data.recentOrders.map((order) => {
+                const hint = getWorkspaceHint(order);
+
+                return (
+                  <div className="flex items-center" key={order.id}>
+                    <Link
+                      className="grid flex-1 gap-2 px-2 py-3 text-sm outline-none transition hover:bg-[#faf9f4] focus-visible:ring-2 focus-visible:ring-[#17211b] sm:grid-cols-[1fr_auto_auto]"
+                      href={`/app/orders/${order.id}`}
+                    >
+                      <span className="font-semibold">
+                        {order.tableLabel ?? "Table service"}
+                      </span>
+                      <span className="text-[#667064]">
+                        {formatStatus(order.serviceStatus)}
+                      </span>
+                      <span className="font-semibold">{formatSen(order.totalSen)}</span>
+                    </Link>
+                    {hint && (
+                      <Link
+                        className="shrink-0 px-2 text-xs font-semibold text-[#5f7056] underline-offset-2 hover:underline"
+                        href={hint.href}
+                      >
+                        {hint.label}
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </Surface>
@@ -323,6 +340,31 @@ export default async function AppPage() {
       )}
     </AppShell>
   );
+}
+
+function getWorkspaceHint(order: OrderSummary): { label: string; href: string } | null {
+  if (
+    order.releasePolicy === "RELEASE_BY_AUTHORISED_STAFF" &&
+    order.releaseState === "NOT_RELEASED"
+  ) {
+    return { label: "→ Counter", href: "/app/counter" };
+  }
+
+  if (order.fulfilmentState === "READY_FOR_HANDOFF") {
+    return { label: "→ Floor & Service", href: "/app/waiter" };
+  }
+
+  if (
+    order.releaseState === "RELEASED" &&
+    order.closureState !== "COMPLETE" &&
+    order.serviceStatus !== "SERVED_OR_COLLECTED" &&
+    order.serviceStatus !== "COMPLETED" &&
+    order.serviceStatus !== "CANCELLED"
+  ) {
+    return { label: "→ Kitchen", href: "/app/kitchen" };
+  }
+
+  return null;
 }
 
 function MetricCard({

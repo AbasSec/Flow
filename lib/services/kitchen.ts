@@ -4,15 +4,20 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/db/server";
 import {
+  isActiveKitchenBoardOrder,
+  type KitchenBoardOrderState
+} from "@/lib/domain/kitchen-board";
+import {
   KITCHEN_ROLES,
   MANAGEMENT_ROLES,
   type ServiceResult,
   type WorkspaceContext,
+  getPrimaryAuthorisedOutletId,
+  hasOrganisationWideOutletAccess,
   minutesSince,
   requireAdminClient,
   requireWorkspaceContext,
-  roleIn,
-  serviceError
+  roleIn
 } from "@/lib/services/context";
 import {
   getNextKitchenTicketStatus,
@@ -66,6 +71,7 @@ type TicketLineRow = {
 };
 
 type StationMembershipRow = { station_id: string };
+type TicketOrderStateRow = KitchenBoardOrderState & { id: string };
 
 function relationOne<T>(value: T | T[] | null): T | null {
   if (Array.isArray(value)) {
@@ -93,7 +99,15 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
 
     const admin = requireAdminClient();
     const canViewAllStations = roleIn(context.role, MANAGEMENT_ROLES);
+    const outletId =
+      canViewAllStations && !hasOrganisationWideOutletAccess(context.role)
+        ? await getPrimaryAuthorisedOutletId(context)
+        : null;
     let assignedStationIds: string[] | null = null;
+
+    if (canViewAllStations && !hasOrganisationWideOutletAccess(context.role) && !outletId) {
+      return { ok: true, data: { context, canViewAllStations, tickets: [] } };
+    }
 
     if (!canViewAllStations) {
       const { data, error } = await admin
@@ -123,6 +137,10 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
       .in("status", ["NEW", "ACCEPTED", "PREPARING", "READY"])
       .order("created_at", { ascending: true });
 
+    if (outletId) {
+      ticketQuery = ticketQuery.eq("outlet_id", outletId);
+    }
+
     if (assignedStationIds) {
       ticketQuery = ticketQuery.in("station_id", assignedStationIds);
     }
@@ -134,7 +152,30 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
     }
 
     const tickets = (ticketsData ?? []) as TicketRow[];
-    const ticketIds = tickets.map((ticket) => ticket.id);
+    const orderIds = Array.from(new Set(tickets.map((ticket) => ticket.order_id)));
+    let orderStates: TicketOrderStateRow[] = [];
+
+    if (orderIds.length > 0) {
+      const { data, error } = await admin
+        .from("orders")
+        .select("id, fulfilment_state, closure_state, service_status")
+        .eq("org_id", context.orgId)
+        .in("id", orderIds);
+
+      if (error) {
+        throw error;
+      }
+
+      orderStates = (data ?? []) as TicketOrderStateRow[];
+    }
+
+    const orderStateById = new Map(
+      orderStates.map((order) => [order.id, order] as const)
+    );
+    const activeTickets = tickets.filter((ticket) =>
+      isActiveKitchenBoardOrder(orderStateById.get(ticket.order_id))
+    );
+    const ticketIds = activeTickets.map((ticket) => ticket.id);
     let ticketLines: TicketLineRow[] = [];
 
     if (ticketIds.length > 0) {
@@ -156,7 +197,7 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
       data: {
         context,
         canViewAllStations,
-        tickets: tickets.map((ticket) => ({
+        tickets: activeTickets.map((ticket) => ({
           id: ticket.id,
           orderId: ticket.order_id,
           stationId: ticket.station_id,
@@ -179,8 +220,12 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
         }))
       }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Unable to load kitchen tickets right now."
+    };
   }
 }
 
@@ -224,7 +269,11 @@ export async function transitionKitchenTicket(
       ok: true,
       data: { ticketId: result?.ticket_id ?? parsed.ticketId, orderId }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Kitchen ticket could not be moved to the requested state."
+    };
   }
 }

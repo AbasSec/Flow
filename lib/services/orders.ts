@@ -8,10 +8,12 @@ import {
   SETTLEMENT_ROLES,
   type ServiceResult,
   type WorkspaceContext,
+  canAccessOutlet,
+  getPrimaryAuthorisedOutletId,
+  minutesSince,
   requireAdminClient,
   requireWorkspaceContext,
-  roleIn,
-  serviceError
+  roleIn
 } from "@/lib/services/context";
 
 const orderItemSchema = z.object({
@@ -61,6 +63,7 @@ export type OrderSummary = {
 };
 
 export type OrderDetail = {
+  context: WorkspaceContext;
   id: string;
   outletId: string;
   orderChannel: string;
@@ -181,8 +184,50 @@ export async function getOutletLifecycleMode(
       ok: true,
       data: { outletId: row.id, lifecycleMode: row.lifecycle_mode ?? "LEGACY" }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Order could not be created. Check table, menu availability, and stock, then try again."
+    };
+  }
+}
+
+export async function getOutletLifecycleModeForContext(
+  context: WorkspaceContext
+): Promise<ServiceResult<OutletLifecycleInfo>> {
+  try {
+    const outletId = await getPrimaryAuthorisedOutletId(context);
+
+    if (!outletId) {
+      return { ok: false, reason: "not_found", message: "No active outlet found." };
+    }
+
+    const admin = requireAdminClient();
+    const { data, error } = await admin
+      .from("outlets")
+      .select("id, lifecycle_mode")
+      .eq("id", outletId)
+      .eq("org_id", context.orgId)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (error) {
+      return { ok: false, reason: "error", message: "Outlet information is unavailable." };
+    }
+
+    if (!data) {
+      return { ok: false, reason: "not_found", message: "No active outlet found." };
+    }
+
+    const row = data as { id: string; lifecycle_mode: string };
+
+    return {
+      ok: true,
+      data: { outletId: row.id, lifecycleMode: row.lifecycle_mode ?? "LEGACY" }
+    };
+  } catch {
+    return { ok: false, reason: "error", message: "Outlet information is unavailable." };
   }
 }
 
@@ -226,8 +271,12 @@ export async function enableOutletV31(
       ok: true,
       data: { outletId: result?.outlet_id ?? outletId, changed: result?.changed ?? false }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Settlement could not be recorded for this order."
+    };
   }
 }
 
@@ -261,7 +310,7 @@ export async function getWaiterData(): Promise<ServiceResult<WaiterData>> {
       };
     }
 
-    const outletId = await getPrimaryOutletId(context.orgId);
+    const outletId = await getPrimaryAuthorisedOutletId(context);
 
     if (!outletId) {
       return { ok: false, reason: "not_found", message: "No active outlet found." };
@@ -315,8 +364,12 @@ export async function getWaiterData(): Promise<ServiceResult<WaiterData>> {
         }))
       }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Unable to load Floor & Service right now."
+    };
   }
 }
 
@@ -359,8 +412,12 @@ export async function createTableOrder(input: unknown): Promise<ServiceResult<{ 
     revalidatePath("/app/connect");
 
     return { ok: true, data: { orderId: result.order_id } };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Order could not be created. Check table, menu availability, and stock, then try again."
+    };
   }
 }
 
@@ -400,8 +457,12 @@ export async function settleOrderManually(orderId: string): Promise<ServiceResul
     revalidatePath(`/app/orders/${orderId}`);
 
     return { ok: true, data: { orderId: result?.order_id ?? orderId } };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Settlement could not be recorded for this order."
+    };
   }
 }
 
@@ -444,8 +505,12 @@ export async function releaseOrderToKitchen(
     revalidatePath(`/app/orders/${orderId}`);
 
     return { ok: true, data: { orderId: result?.order_id ?? orderId } };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Order could not be released. Confirm settlement, outlet access, and stock availability."
+    };
   }
 }
 
@@ -488,13 +553,18 @@ export async function markOrderServed(
     revalidatePath(`/app/orders/${orderId}`);
 
     return { ok: true, data: { orderId: result?.order_id ?? orderId } };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Order could not be marked served."
+    };
   }
 }
 
 export async function getRecentOrders(
   orgId: string,
+  outletId: string,
   limit = 8
 ): Promise<OrderSummary[]> {
   const admin = requireAdminClient();
@@ -504,6 +574,7 @@ export async function getRecentOrders(
       "id, service_status, payment_status, release_policy, release_state, fulfilment_state, closure_state, total_sen, created_at, table_sessions(table_label)"
     )
     .eq("org_id", orgId)
+    .eq("outlet_id", outletId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -523,6 +594,59 @@ export async function getRecentOrders(
     totalSen: Number(row.total_sen),
     createdAt: row.created_at
   }));
+}
+
+export type ReadyToServeCard = {
+  id: string;
+  tableLabel: string | null;
+  totalSen: number;
+  createdAt: string;
+  ageMinutes: number;
+};
+
+export async function getReadyToServeOrders(
+  context: WorkspaceContext,
+  outletId: string
+): Promise<ServiceResult<ReadyToServeCard[]>> {
+  try {
+    if (!(await canAccessOutlet(context, outletId))) {
+      return {
+        ok: false,
+        reason: "not_found",
+        message: "Unable to load service orders right now."
+      };
+    }
+
+    const admin = requireAdminClient();
+    const { data, error } = await admin
+      .from("orders")
+      .select("id, total_sen, created_at, table_sessions(table_label)")
+      .eq("org_id", context.orgId)
+      .eq("outlet_id", outletId)
+      .eq("fulfilment_state", "READY_FOR_HANDOFF")
+      .in("order_channel", ["table", "qr"])
+      .order("created_at", { ascending: true })
+      .limit(50);
+
+    if (error) throw error;
+
+    return {
+      ok: true,
+      data: ((data ?? []) as OrderRow[]).map((row) => ({
+        id: row.id,
+        tableLabel: firstTableLabel(row.table_sessions),
+        totalSen: Number(row.total_sen),
+        createdAt: row.created_at,
+        ageMinutes: minutesSince(row.created_at)
+      }))
+    };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Unable to load service orders right now."
+    };
+  }
 }
 
 export async function getOrderDetail(orderId: string): Promise<ServiceResult<OrderDetail>> {
@@ -548,17 +672,24 @@ export async function getOrderDetail(orderId: string): Promise<ServiceResult<Ord
     }
 
     const order = orderData as OrderRow;
+
+    if (!(await canAccessOutlet(context, order.outlet_id))) {
+      return { ok: false, reason: "not_found", message: "Order was not found." };
+    }
+
     const [linesResult, ticketsResult, threadResult] = await Promise.all([
       admin
         .from("order_lines")
         .select("id, item_name_snapshot, unit_price_sen, quantity, line_total_sen")
         .eq("org_id", context.orgId)
+        .eq("outlet_id", order.outlet_id)
         .eq("order_id", order.id)
         .order("created_at"),
       admin
         .from("kitchen_tickets")
         .select("id, status, created_at, kitchen_stations(name)")
         .eq("org_id", context.orgId)
+        .eq("outlet_id", order.outlet_id)
         .eq("order_id", order.id)
         .order("created_at"),
       admin
@@ -585,6 +716,7 @@ export async function getOrderDetail(orderId: string): Promise<ServiceResult<Ord
     return {
       ok: true,
       data: {
+        context,
         id: order.id,
         outletId: order.outlet_id,
         orderChannel: order.order_channel,
@@ -614,7 +746,11 @@ export async function getOrderDetail(orderId: string): Promise<ServiceResult<Ord
         threadRoomId: ((threadResult.data as ThreadRow | null) ?? null)?.room_id ?? null
       }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Order details are unavailable right now."
+    };
   }
 }

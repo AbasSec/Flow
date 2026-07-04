@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { getKitchenBoard, getNextKitchenStatus } from "@/lib/services/kitchen";
-import { transitionTicketAction } from "./actions";
+import { KitchenTransitionForm } from "./kitchen-transition-form";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,7 @@ export default async function KitchenPage() {
 
   return (
     <AppShell
+      role={board.context.role}
       subtitle={
         board.canViewAllStations
           ? "Viewing all BrewBite kitchen stations."
@@ -36,7 +37,7 @@ export default async function KitchenPage() {
       }
       title="Kitchen Board"
     >
-      <AutoRefresh intervalMs={5000} />
+      <AutoRefresh intervalMs={15000} />
       {board.tickets.length === 0 ? (
         <StatePanel title="No open tickets">
           Staff table orders appear after server validation. QR pay-at-counter
@@ -89,16 +90,7 @@ export default async function KitchenPage() {
                   ))}
                 </ul>
                 {nextStatus ? (
-                  <form action={transitionTicketAction} className="mt-5">
-                    <input name="ticketId" type="hidden" value={ticket.id} />
-                    <input name="nextStatus" type="hidden" value={nextStatus} />
-                    <button
-                      className="min-h-12 w-full bg-[#17211b] px-4 py-3 text-sm font-semibold text-white outline-none transition hover:bg-[#263128] focus-visible:ring-2 focus-visible:ring-[#17211b] focus-visible:ring-offset-2"
-                      type="submit"
-                    >
-                      Move to {nextStatus}
-                    </button>
-                  </form>
+                  <KitchenTransitionForm nextStatus={nextStatus} ticketId={ticket.id} />
                 ) : null}
               </Surface>
             );
