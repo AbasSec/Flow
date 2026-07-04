@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   demoSettlementAction,
   markServedAction,
@@ -44,11 +45,18 @@ const actionConfig = {
 } as const;
 
 export function OrderLifecycleForm({ actionKind, orderId }: LifecycleFormProps) {
+  const router = useRouter();
   const config = actionConfig[actionKind];
   const [state, formAction, isPending] = useActionState<
     SettlementActionState,
     FormData
   >(config.action, { message: "" });
+
+  useEffect(() => {
+    if (state.ok) {
+      router.refresh();
+    }
+  }, [router, state.ok]);
 
   return (
     <form action={formAction} className="border border-[#d7d2c4] bg-white p-5 shadow-sm">

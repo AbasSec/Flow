@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   counterReleaseAction,
   counterSettleAction,
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function CounterActionForm({ orderId, kind }: Props) {
+  const router = useRouter();
   const action = kind === "settle" ? counterSettleAction : counterReleaseAction;
   const label = kind === "settle" ? "Record settlement" : "Release to kitchen";
   const pendingLabel = kind === "settle" ? "Recording..." : "Releasing...";
@@ -22,6 +24,12 @@ export function CounterActionForm({ orderId, kind }: Props) {
     action,
     { message: "" }
   );
+
+  useEffect(() => {
+    if (state.ok) {
+      router.refresh();
+    }
+  }, [router, state.ok]);
 
   if (state.ok) {
     return (

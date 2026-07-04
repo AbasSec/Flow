@@ -39,7 +39,7 @@ export default async function CounterPage() {
       subtitle="Manage pay-at-counter QR orders: record settlement and release to kitchen."
       title="Counter"
     >
-      <AutoRefresh intervalMs={8000} />
+      <AutoRefresh intervalMs={15000} />
 
       <Surface className="p-5">
         <div className="flex items-center justify-between gap-3">

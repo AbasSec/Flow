@@ -6,6 +6,8 @@
 
 **Pre-merge security remediation:** Outlet-scoped private reads were tightened so an empty site-membership set is never treated as proof of authority for non-owner/admin roles.
 
+**Pre-merge polish remediation:** Generic workspace loading now preserves navigation geometry without exposing an active Counter link, active Kitchen work is filtered by linked order lifecycle truth, and successful actions trigger immediate route refresh after server-side revalidation.
+
 ## Scope Completed
 
 This milestone adds two focused V3.1 operational workspaces on top of the completed Lifecycle Kernel:
@@ -89,6 +91,24 @@ Counter appears only for:
 
 When role is absent, unknown, or unauthorised, Counter is hidden. Dashboard, Counter, Floor & Service, Kitchen, Order Detail, and Connect pass their known role to the shell where available. Navigation remains presentation only; server services and database RPCs still enforce authority.
 
+During generic `/app` loading, the shell reserves the Counter slot with a neutral non-link placeholder. This prevents layout jump for authorised Counter users while still keeping Counter non-actionable until the authenticated role is known.
+
+## Active Kitchen Board
+
+The Kitchen board continues to show only Kitchen-owned states:
+
+```text
+NEW -> ACCEPTED -> PREPARING -> READY
+```
+
+V3 Kitchen still stops at `READY`; no `COMPLETED` action was added. Active Kitchen cards now also check the linked order lifecycle. A `READY` ticket stays visible while the linked order is awaiting handoff/service, then disappears from the active Kitchen board after Floor & Service records `SERVED`, or after equivalent collected/closed/cancelled lifecycle truth exists. The ticket remains available through protected order detail and historical audit/database evidence.
+
+## Immediate Feedback And Passive Refresh
+
+Successful Counter settlement, Counter release, Kitchen ticket transition, Floor & Service served, and Order Detail lifecycle actions still run through server actions and controlled services/RPCs. After success, the server revalidates the relevant routes and the client form calls `router.refresh()` so the visible row/card updates or disappears promptly without `window.location.reload`, raw fetch/XHR mutation, or client-side database writes.
+
+`AutoRefresh` remains a fallback refresh hint. Operational workspaces now use a calmer 15-second interval and skip passive refresh while the browser tab is hidden.
+
 ## Dashboard And Order Detail Boundary
 
 Dashboard remains a command-centre oversight surface. It does not duplicate Counter controls.
@@ -132,7 +152,9 @@ Created:
 - `app/app/counter/page.tsx`
 - `app/app/counter/actions.ts`
 - `app/app/counter/counter-action-form.tsx`
+- `app/app/kitchen/kitchen-transition-form.tsx`
 - `app/app/waiter/floor-serve-form.tsx`
+- `lib/domain/kitchen-board.ts`
 - `lib/services/counter.ts`
 - `tests/unit/operational-workspaces-static.test.ts`
 - `docs/V3_1_OPERATIONAL_WORKSPACES_REPORT.md`
@@ -140,13 +162,18 @@ Created:
 Changed:
 
 - `app/app/error.tsx`
+- `app/app/loading.tsx`
+- `app/app/kitchen/actions.ts`
 - `app/app/kitchen/page.tsx`
+- `app/app/orders/[id]/actions.ts`
 - `app/app/page.tsx`
 - `app/app/waiter/actions.ts`
 - `app/app/waiter/page.tsx`
 - `app/app/connect/page.tsx`
 - `app/app/orders/[id]/page.tsx`
+- `app/app/orders/[id]/settlement-form.tsx`
 - `components/flow-ui.tsx`
+- `components/auto-refresh.tsx`
 - `lib/services/context.ts`
 - `lib/services/dashboard.ts`
 - `lib/services/kitchen.ts`
@@ -167,9 +194,9 @@ No schema, RLS, RPC, role, grant, seed, Supabase, Vercel, secret, or environment
 | `git diff --check` | Passed |
 | `pnpm lint` | Passed |
 | `pnpm typecheck` | Passed |
-| `pnpm test` | Passed — 14 files, 140 tests |
+| `pnpm test` | Passed — 14 files, 158 tests |
 | `pnpm build` | Passed |
-| Local V3.1 lifecycle SQL regression | Passed against disposable local Docker database `flow-regression-db` |
+| Local V3.1 lifecycle SQL regression | Not rerun for this UI polish pass; previous lifecycle-kernel regression remains documented in `docs/V3_1_LIFECYCLE_KERNEL_REPORT.md`. |
 
 ## Manual Acceptance Checklist
 
@@ -183,6 +210,9 @@ No schema, RLS, RPC, role, grant, seed, Supabase, Vercel, secret, or environment
 - Move Kitchen ticket through `NEW -> ACCEPTED -> PREPARING -> READY`.
 - Confirm ready dine-in order appears in Floor & Service.
 - Mark served from Floor & Service and confirm Order Detail reflects served/complete state.
+- Confirm the served order disappears from the active Kitchen board without changing the ticket to `COMPLETED`.
+- Trigger settlement, release, Kitchen transition, and Mark served; confirm the current route refreshes immediately without waiting for passive refresh.
+- Navigate between protected workspaces and confirm the loading state keeps the nav layout stable with a non-clickable Counter placeholder.
 - Confirm Dashboard only links users toward Counter, Kitchen, and Floor & Service and does not duplicate Counter controls.
 - Confirm public QR and public tracking remain pay-at-counter and token-scoped.
 

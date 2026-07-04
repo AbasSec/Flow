@@ -1,16 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   markServedFromFloorAction,
   type FloorServedActionState
 } from "./actions";
 
 export function FloorServeForm({ orderId }: { orderId: string }) {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState<FloorServedActionState, FormData>(
     markServedFromFloorAction,
     { message: "" }
   );
+
+  useEffect(() => {
+    if (state.ok) {
+      router.refresh();
+    }
+  }, [router, state.ok]);
 
   if (state.ok) {
     return (

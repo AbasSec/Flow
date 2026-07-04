@@ -19,6 +19,7 @@ export async function counterSettleAction(
     return { message: result.message, ok: false };
   }
 
+  revalidatePath("/app");
   revalidatePath("/app/counter");
   revalidatePath(`/app/orders/${orderId}`);
   return { message: "Manual settlement recorded.", ok: true };
@@ -35,6 +36,7 @@ export async function counterReleaseAction(
     return { message: result.message, ok: false };
   }
 
+  revalidatePath("/app");
   revalidatePath("/app/counter");
   revalidatePath("/app/kitchen");
   revalidatePath(`/app/orders/${orderId}`);

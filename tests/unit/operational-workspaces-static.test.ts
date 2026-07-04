@@ -5,6 +5,7 @@ import {
   hasExplicitActiveSiteMembership,
   hasOrganisationWideOutletAccess
 } from "@/lib/services/outlet-access-policy";
+import { isActiveKitchenBoardOrder } from "@/lib/domain/kitchen-board";
 
 const counterService = readFileSync(
   join(process.cwd(), "lib", "services", "counter.ts"),
@@ -22,6 +23,10 @@ const counterActionForm = readFileSync(
   join(process.cwd(), "app", "app", "counter", "counter-action-form.tsx"),
   "utf8"
 );
+const appLoading = readFileSync(
+  join(process.cwd(), "app", "app", "loading.tsx"),
+  "utf8"
+);
 const floorPage = readFileSync(
   join(process.cwd(), "app", "app", "waiter", "page.tsx"),
   "utf8"
@@ -36,6 +41,10 @@ const floorServeForm = readFileSync(
 );
 const ordersSvc = readFileSync(
   join(process.cwd(), "lib", "services", "orders.ts"),
+  "utf8"
+);
+const kitchenService = readFileSync(
+  join(process.cwd(), "lib", "services", "kitchen.ts"),
   "utf8"
 );
 const navSrc = readFileSync(
@@ -69,6 +78,26 @@ const outletAccessPolicy = readFileSync(
 const proxySrc = readFileSync(join(process.cwd(), "proxy.ts"), "utf8");
 const kitchenPage = readFileSync(
   join(process.cwd(), "app", "app", "kitchen", "page.tsx"),
+  "utf8"
+);
+const kitchenActions = readFileSync(
+  join(process.cwd(), "app", "app", "kitchen", "actions.ts"),
+  "utf8"
+);
+const kitchenTransitionForm = readFileSync(
+  join(process.cwd(), "app", "app", "kitchen", "kitchen-transition-form.tsx"),
+  "utf8"
+);
+const orderActions = readFileSync(
+  join(process.cwd(), "app", "app", "orders", "[id]", "actions.ts"),
+  "utf8"
+);
+const orderLifecycleForm = readFileSync(
+  join(process.cwd(), "app", "app", "orders", "[id]", "settlement-form.tsx"),
+  "utf8"
+);
+const autoRefresh = readFileSync(
+  join(process.cwd(), "components", "auto-refresh.tsx"),
   "utf8"
 );
 
@@ -194,6 +223,7 @@ describe("Counter actions use controlled service paths", () => {
   });
 
   it("counter settle action revalidates /app/counter on success", () => {
+    expect(counterActions).toContain('revalidatePath("/app")');
     expect(counterActions).toContain('revalidatePath("/app/counter")');
   });
 
@@ -232,6 +262,12 @@ describe("Counter page rendering", () => {
     expect(counterActionForm).toContain("useActionState");
     expect(counterActionForm).not.toContain("fetch(");
     expect(counterActionForm).not.toContain("XMLHttpRequest");
+  });
+
+  it("counter action form refreshes the current route immediately after successful server action", () => {
+    expect(counterActionForm).toContain("useRouter");
+    expect(counterActionForm).toContain("router.refresh()");
+    expect(counterActionForm).toContain("state.ok");
   });
 
   it("counter page does not expose raw database error messages", () => {
@@ -314,7 +350,15 @@ describe("Mark served from Floor & Service", () => {
   });
 
   it("mark served action revalidates /app/waiter", () => {
+    expect(floorActions).toContain('revalidatePath("/app")');
     expect(floorActions).toContain('revalidatePath("/app/waiter")');
+    expect(floorActions).toContain('revalidatePath("/app/kitchen")');
+  });
+
+  it("mark served form refreshes Floor & Service immediately after successful server action", () => {
+    expect(floorServeForm).toContain("useRouter");
+    expect(floorServeForm).toContain("router.refresh()");
+    expect(floorServeForm).toContain("state.ok");
   });
 
   it("markOrderServed service checks owner/admin/manager/waiter — cashier cannot mark served", () => {
@@ -344,6 +388,18 @@ describe("Navigation and role awareness", () => {
   it("Counter nav link is hidden when role is absent or unknown", () => {
     expect(navSrc).not.toContain("!role || COUNTER_VISIBLE_ROLES.has(role)");
     expect(navSrc).toContain("Boolean(role && COUNTER_VISIBLE_ROLES.has(role))");
+  });
+
+  it("generic workspace loading preserves Counter geometry with a neutral non-link placeholder", () => {
+    const placeholderBlock = navSrc
+      .split("function CounterNavPlaceholder")[1]
+      .split("export function NavLink")[0];
+
+    expect(appLoading).toContain("reserveCounterSlot");
+    expect(navSrc).toContain("showCounterPlaceholder");
+    expect(placeholderBlock).toContain('aria-hidden="true"');
+    expect(placeholderBlock).not.toContain("href=");
+    expect(appLoading).not.toContain('href="/app/counter"');
   });
 
   it("Counter nav link is visible for owner, admin, manager, cashier", () => {
@@ -402,5 +458,116 @@ describe("Safe error presentation", () => {
   it("protected app error boundary does not render raw error.message", () => {
     expect(appErrorPage).not.toContain("error.message");
     expect(appErrorPage).toContain("The workspace could not be loaded safely.");
+  });
+});
+
+describe("Kitchen board active-work cleanup", () => {
+  it("keeps a V3 READY order visible before Floor & Service marks it served", () => {
+    expect(
+      isActiveKitchenBoardOrder({
+        fulfilment_state: "READY_FOR_HANDOFF",
+        closure_state: "OPEN",
+        service_status: "READY"
+      })
+    ).toBe(true);
+  });
+
+  it("removes served, collected, closed, and cancelled orders from active Kitchen work", () => {
+    expect(
+      isActiveKitchenBoardOrder({
+        fulfilment_state: "SERVED",
+        closure_state: "COMPLETE",
+        service_status: "SERVED_OR_COLLECTED"
+      })
+    ).toBe(false);
+    expect(
+      isActiveKitchenBoardOrder({
+        fulfilment_state: "COLLECTED",
+        closure_state: "COMPLETE",
+        service_status: "SERVED_OR_COLLECTED"
+      })
+    ).toBe(false);
+    expect(
+      isActiveKitchenBoardOrder({
+        fulfilment_state: "RELEASED",
+        closure_state: "CANCELLED",
+        service_status: "CANCELLED"
+      })
+    ).toBe(false);
+  });
+
+  it("filters active Kitchen board tickets through linked order lifecycle truth", () => {
+    expect(kitchenService).toContain("isActiveKitchenBoardOrder");
+    expect(kitchenService).toContain(
+      '.select("id, fulfilment_state, closure_state, service_status")'
+    );
+    expect(kitchenService).toContain("activeTickets");
+    expect(kitchenService).toContain("ticket.order_id");
+  });
+
+  it("keeps Kitchen transitions limited to READY and does not add COMPLETED through Mark served", () => {
+    expect(kitchenService).toContain('z.enum(["ACCEPTED", "PREPARING", "READY"])');
+    expect(kitchenTransitionForm).not.toContain("COMPLETED");
+    expect(floorActions).not.toContain("transitionKitchenTicket");
+    expect(floorServeForm).not.toContain("COMPLETED");
+  });
+
+  it("served ticket history remains available through protected order detail", () => {
+    expect(orderDetailPage).toContain("Kitchen tickets");
+    expect(orderDetailPage).toContain("order.tickets.map");
+    expect(orderDetailPage).toContain("getOrderDetail");
+  });
+});
+
+describe("Action refresh and passive refresh policy", () => {
+  it("counter settlement and release revalidate relevant routes and refresh immediately", () => {
+    expect(counterActions).toContain('revalidatePath("/app")');
+    expect(counterActions).toContain('revalidatePath("/app/counter")');
+    expect(counterActions).toContain('revalidatePath("/app/kitchen")');
+    expect(counterActionForm).toContain("router.refresh()");
+  });
+
+  it("kitchen transition revalidates Kitchen and refreshes immediately", () => {
+    expect(kitchenActions).toContain("transitionKitchenTicket");
+    expect(kitchenTransitionForm).toContain("useActionState");
+    expect(kitchenTransitionForm).toContain("useRouter");
+    expect(kitchenTransitionForm).toContain("router.refresh()");
+    expect(kitchenService).toContain('revalidatePath("/app/kitchen")');
+  });
+
+  it("Floor Mark served revalidates Floor and Kitchen and refreshes immediately", () => {
+    expect(floorActions).toContain('revalidatePath("/app/waiter")');
+    expect(floorActions).toContain('revalidatePath("/app/kitchen")');
+    expect(floorServeForm).toContain("router.refresh()");
+  });
+
+  it("order-detail lifecycle forms also refresh after successful controlled actions", () => {
+    expect(orderActions).toContain('revalidatePath("/app/counter")');
+    expect(orderActions).toContain('revalidatePath("/app/kitchen")');
+    expect(orderActions).toContain('revalidatePath("/app/waiter")');
+    expect(orderLifecycleForm).toContain("router.refresh()");
+  });
+
+  it("does not use hard browser reloads or raw client mutation fetches", () => {
+    const changedClientForms = [
+      counterActionForm,
+      floorServeForm,
+      kitchenTransitionForm,
+      orderLifecycleForm
+    ].join("\n");
+
+    expect(changedClientForms).not.toContain("window.location.reload");
+    expect(changedClientForms).not.toContain("location.reload");
+    expect(changedClientForms).not.toContain("fetch(");
+    expect(changedClientForms).not.toContain("XMLHttpRequest");
+  });
+
+  it("passive refresh is a calmer visible-tab fallback", () => {
+    expect(autoRefresh).toContain("intervalMs = 15000");
+    expect(autoRefresh).toContain('document.visibilityState !== "visible"');
+    expect(counterPage).toContain("intervalMs={15000}");
+    expect(floorPage).toContain("intervalMs={15000}");
+    expect(kitchenPage).toContain("intervalMs={15000}");
+    expect(orderDetailPage).toContain("intervalMs={15000}");
   });
 });

@@ -54,7 +54,9 @@ export async function markServedFromFloorAction(
     return { message: result.message, ok: false };
   }
 
+  revalidatePath("/app");
   revalidatePath("/app/waiter");
+  revalidatePath("/app/kitchen");
   revalidatePath(`/app/orders/${orderId}`);
   return { message: "Order marked served.", ok: true };
 }

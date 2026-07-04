@@ -77,7 +77,7 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
       subtitle="Internal order record with server-owned lines, kitchen state, settlement status, and work context."
       title="Order Detail"
     >
-      <AutoRefresh intervalMs={5000} />
+      <AutoRefresh intervalMs={15000} />
       <section className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
           <Surface className="p-5">
