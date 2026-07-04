@@ -1,16 +1,16 @@
 import "server-only";
 
 import { getInventoryRisks } from "@/lib/services/inventory";
-import { getPrimaryOutletId, getRecentOrders, type OrderSummary } from "@/lib/services/orders";
+import { getRecentOrders, type OrderSummary } from "@/lib/services/orders";
 import {
   MANAGEMENT_ROLES,
   type ServiceResult,
   type WorkspaceContext,
+  getPrimaryAuthorisedOutletId,
   minutesSince,
   requireAdminClient,
   requireWorkspaceContext,
-  roleIn,
-  serviceError
+  roleIn
 } from "@/lib/services/context";
 
 export type DashboardActivity = {
@@ -55,7 +55,7 @@ export async function getDashboardData(): Promise<ServiceResult<DashboardData>> 
       };
     }
 
-    const outletId = await getPrimaryOutletId(context.orgId);
+    const outletId = await getPrimaryAuthorisedOutletId(context);
 
     if (!outletId) {
       return { ok: false, reason: "not_found", message: "No active outlet found." };
@@ -77,25 +77,29 @@ export async function getDashboardData(): Promise<ServiceResult<DashboardData>> 
         .from("orders")
         .select("id", { count: "exact", head: true })
         .eq("org_id", context.orgId)
+        .eq("outlet_id", outletId)
         .gte("created_at", todayStart.toISOString()),
       admin
         .from("orders")
         .select("total_sen")
         .eq("org_id", context.orgId)
+        .eq("outlet_id", outletId)
         .eq("payment_status", "PAID")
         .gte("created_at", todayStart.toISOString()),
       admin
         .from("kitchen_tickets")
         .select("created_at")
         .eq("org_id", context.orgId)
+        .eq("outlet_id", outletId)
         .in("status", ["NEW", "ACCEPTED", "PREPARING", "READY"]),
       admin
         .from("audit_events")
         .select("id, action, object_type, object_id, created_at")
         .eq("org_id", context.orgId)
+        .eq("outlet_id", outletId)
         .order("created_at", { ascending: false })
         .limit(8),
-      getRecentOrders(context.orgId),
+      getRecentOrders(context.orgId, outletId),
       getInventoryRisks(context.orgId, outletId)
     ]);
 
@@ -151,7 +155,11 @@ export async function getDashboardData(): Promise<ServiceResult<DashboardData>> 
         )
       }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Unable to load dashboard data right now."
+    };
   }
 }

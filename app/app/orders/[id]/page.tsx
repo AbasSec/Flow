@@ -73,6 +73,7 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
 
   return (
     <AppShell
+      role={order.context.role}
       subtitle="Internal order record with server-owned lines, kitchen state, settlement status, and work context."
       title="Order Detail"
     >
@@ -247,7 +248,7 @@ async function LifecycleGate({
   if (
     (orderChannel === "table" || orderChannel === "qr") &&
     fulfilmentState === "READY_FOR_HANDOFF" &&
-    roleIn(context.role, ORDER_ENTRY_ROLES)
+    roleIn(context.role, ["organisation_owner", "organisation_admin", "manager", "waiter"])
   ) {
     return <OrderLifecycleForm actionKind="served" orderId={orderId} />;
   }

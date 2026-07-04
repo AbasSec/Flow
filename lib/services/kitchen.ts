@@ -8,11 +8,12 @@ import {
   MANAGEMENT_ROLES,
   type ServiceResult,
   type WorkspaceContext,
+  getPrimaryAuthorisedOutletId,
+  hasOrganisationWideOutletAccess,
   minutesSince,
   requireAdminClient,
   requireWorkspaceContext,
-  roleIn,
-  serviceError
+  roleIn
 } from "@/lib/services/context";
 import {
   getNextKitchenTicketStatus,
@@ -93,7 +94,15 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
 
     const admin = requireAdminClient();
     const canViewAllStations = roleIn(context.role, MANAGEMENT_ROLES);
+    const outletId =
+      canViewAllStations && !hasOrganisationWideOutletAccess(context.role)
+        ? await getPrimaryAuthorisedOutletId(context)
+        : null;
     let assignedStationIds: string[] | null = null;
+
+    if (canViewAllStations && !hasOrganisationWideOutletAccess(context.role) && !outletId) {
+      return { ok: true, data: { context, canViewAllStations, tickets: [] } };
+    }
 
     if (!canViewAllStations) {
       const { data, error } = await admin
@@ -122,6 +131,10 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
       .eq("org_id", context.orgId)
       .in("status", ["NEW", "ACCEPTED", "PREPARING", "READY"])
       .order("created_at", { ascending: true });
+
+    if (outletId) {
+      ticketQuery = ticketQuery.eq("outlet_id", outletId);
+    }
 
     if (assignedStationIds) {
       ticketQuery = ticketQuery.in("station_id", assignedStationIds);
@@ -179,8 +192,12 @@ export async function getKitchenBoard(): Promise<ServiceResult<KitchenBoard>> {
         }))
       }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Unable to load kitchen tickets right now."
+    };
   }
 }
 
@@ -224,7 +241,11 @@ export async function transitionKitchenTicket(
       ok: true,
       data: { ticketId: result?.ticket_id ?? parsed.ticketId, orderId }
     };
-  } catch (error) {
-    return { ok: false, reason: "error", message: serviceError(error) };
+  } catch {
+    return {
+      ok: false,
+      reason: "error",
+      message: "Kitchen ticket could not be moved to the requested state."
+    };
   }
 }

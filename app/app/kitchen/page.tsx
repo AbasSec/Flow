@@ -29,6 +29,7 @@ export default async function KitchenPage() {
 
   return (
     <AppShell
+      role={board.context.role}
       subtitle={
         board.canViewAllStations
           ? "Viewing all BrewBite kitchen stations."

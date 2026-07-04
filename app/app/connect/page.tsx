@@ -31,6 +31,7 @@ export default async function ConnectPage({ searchParams }: ConnectPageProps) {
 
   return (
     <AppShell
+      role={result.data.context.role}
       subtitle="Internal operational rooms and order-linked threads. Messages provide context and never change business state."
       title="Flow Connect"
     >

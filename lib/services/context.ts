@@ -59,6 +59,10 @@ export function roleIn(role: string, allowed: readonly string[]): boolean {
   return allowed.includes(role);
 }
 
+export function hasOrganisationWideOutletAccess(role: string): boolean {
+  return role === "organisation_owner" || role === "organisation_admin";
+}
+
 export async function requireWorkspaceContext(): Promise<WorkspaceContext> {
   const { supabase, user } = await getAuthenticatedUser();
 
@@ -100,4 +104,95 @@ export function serviceError(error: unknown): string {
   }
 
   return "The operation could not be completed.";
+}
+
+type OutletScopeRow = {
+  id: string;
+  site_id: string;
+};
+
+type SiteScopeRow = {
+  id: string;
+};
+
+type SiteMembershipRow = {
+  user_id: string;
+};
+
+export async function canAccessOutlet(
+  context: WorkspaceContext,
+  outletId: string
+): Promise<boolean> {
+  const admin = requireAdminClient();
+  const { data: outlet, error: outletError } = await admin
+    .from("outlets")
+    .select("id, site_id")
+    .eq("id", outletId)
+    .eq("org_id", context.orgId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (outletError || !outlet) {
+    return false;
+  }
+
+  if (hasOrganisationWideOutletAccess(context.role)) {
+    return true;
+  }
+
+  const outletRow = outlet as OutletScopeRow;
+  const { data: site, error: siteError } = await admin
+    .from("sites")
+    .select("id")
+    .eq("id", outletRow.site_id)
+    .eq("org_id", context.orgId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (siteError || !(site as SiteScopeRow | null)) {
+    return false;
+  }
+
+  const { data: memberships, error: membershipsError } = await admin
+    .from("site_memberships")
+    .select("user_id")
+    .eq("org_id", context.orgId)
+    .eq("site_id", outletRow.site_id)
+    .is("deactivated_at", null);
+
+  if (membershipsError) {
+    return false;
+  }
+
+  const activeMemberships = (memberships ?? []) as SiteMembershipRow[];
+
+  if (activeMemberships.length === 0) {
+    return true;
+  }
+
+  return activeMemberships.some((membership) => membership.user_id === context.userId);
+}
+
+export async function getPrimaryAuthorisedOutletId(
+  context: WorkspaceContext
+): Promise<string | null> {
+  const admin = requireAdminClient();
+  const { data, error } = await admin
+    .from("outlets")
+    .select("id")
+    .eq("org_id", context.orgId)
+    .eq("is_active", true)
+    .order("created_at");
+
+  if (error) {
+    throw error;
+  }
+
+  for (const outlet of (data ?? []) as Array<{ id: string }>) {
+    if (await canAccessOutlet(context, outlet.id)) {
+      return outlet.id;
+    }
+  }
+
+  return null;
 }
