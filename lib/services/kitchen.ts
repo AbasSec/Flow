@@ -21,7 +21,7 @@ import {
 
 const transitionSchema = z.object({
   ticketId: z.string().uuid(),
-  nextStatus: z.enum(["ACCEPTED", "PREPARING", "READY", "COMPLETED"])
+  nextStatus: z.enum(["ACCEPTED", "PREPARING", "READY"])
 });
 
 export type KitchenTicketCard = {
@@ -197,13 +197,17 @@ export async function transitionKitchenTicket(
       return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
     }
 
-    const { data, error } = await supabase.rpc("flow_m3_transition_kitchen_ticket", {
+    const { data, error } = await supabase.rpc("flow_v3_1_transition_kitchen_ticket", {
       target_ticket_id: parsed.ticketId,
       next_status: parsed.nextStatus
     });
 
     if (error) {
-      return { ok: false, reason: "error", message: error.message };
+      return {
+        ok: false,
+        reason: "error",
+        message: "Kitchen ticket could not be moved to the requested state."
+      };
     }
 
     const result = data as { ticket_id?: string; order_id?: string } | null;

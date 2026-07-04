@@ -4,11 +4,12 @@ import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import {
   SETTLEMENT_ROLES,
+  ORDER_ENTRY_ROLES,
   requireWorkspaceContext,
   roleIn
 } from "@/lib/services/context";
 import { getOrderDetail } from "@/lib/services/orders";
-import { SettlementForm } from "./settlement-form";
+import { OrderLifecycleForm } from "./settlement-form";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +21,21 @@ const orderStatusLabels: Record<string, string> = {
   ACCEPTED: "Accepted",
   CANCELLED: "Cancelled",
   COMPLETED: "Order complete",
+  COMPLETE: "Complete",
+  COLLECTED: "Collected",
+  HELD: "Held",
   NEW: "New",
+  NOT_RELEASED: "Not released",
+  OPEN: "Open",
   PAID: "Paid",
   PREPARING: "Preparing",
   READY: "Ready",
+  READY_FOR_HANDOFF: "Ready for handoff",
+  RELEASED: "Released",
+  RELEASE_BY_AUTHORISED_STAFF: "Release by staff",
+  RELEASE_ON_SUBMIT: "Release on submit",
+  RELEASE_ON_VERIFIED_PAYMENT: "Release after verified payment",
+  SERVED: "Served",
   SERVED_OR_COLLECTED: "Order complete",
   SUBMITTED: "Submitted",
   UNPAID: "Unpaid"
@@ -113,20 +125,56 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
 
           <Surface className="p-5">
             <h2 className="text-lg font-semibold">Kitchen tickets</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {order.tickets.map((ticket) => (
-                <div className="border border-[#ebe7dc] bg-[#faf9f4] p-3" key={ticket.id}>
-                  <p className="text-sm font-semibold">{ticket.stationName}</p>
-                  <p className="mt-1 text-xs text-[#667064]">
-                    Ticket {ticket.id.slice(0, 6)} - {formatOrderStatus(ticket.status)}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {order.tickets.length === 0 ? (
+              <p className="mt-4 border border-dashed border-[#d7d2c4] bg-[#faf9f4] p-3 text-sm text-[#667064]">
+                No active kitchen tickets yet. QR pay-at-counter orders wait
+                for authorised settlement and kitchen release.
+              </p>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {order.tickets.map((ticket) => (
+                  <div className="border border-[#ebe7dc] bg-[#faf9f4] p-3" key={ticket.id}>
+                    <p className="text-sm font-semibold">{ticket.stationName}</p>
+                    <p className="mt-1 text-xs text-[#667064]">
+                      Ticket {ticket.id.slice(0, 6)} - {formatOrderStatus(ticket.status)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </Surface>
         </div>
 
         <aside className="space-y-5">
+          <Surface className="p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
+              V3 lifecycle
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">Operational ownership</h2>
+            <dl className="mt-4 grid gap-3 text-sm">
+              <LifecycleFact label="Payment" value={formatOrderStatus(order.paymentStatus)} />
+              <LifecycleFact
+                label="Release"
+                value={
+                  order.releaseState
+                    ? `${formatOrderStatus(order.releaseState)} (${formatOrderStatus(order.releasePolicy ?? "Legacy")})`
+                    : "Legacy record"
+                }
+              />
+              <LifecycleFact
+                label="Fulfilment"
+                value={
+                  order.fulfilmentState
+                    ? formatOrderStatus(order.fulfilmentState)
+                    : "Legacy / not yet evidenced"
+                }
+              />
+              <LifecycleFact
+                label="Closure"
+                value={order.closureState ? formatOrderStatus(order.closureState) : "Legacy record"}
+              />
+            </dl>
+          </Surface>
           {order.threadRoomId ? (
             <Link
               className="block border border-[#d7d2c4] bg-white p-5 shadow-sm outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
@@ -140,23 +188,71 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
               </p>
             </Link>
           ) : null}
-          <SettlementGate orderId={order.id} paymentStatus={order.paymentStatus} />
+          <LifecycleGate
+            fulfilmentState={order.fulfilmentState}
+            orderChannel={order.orderChannel}
+            orderId={order.id}
+            paymentStatus={order.paymentStatus}
+            releasePolicy={order.releasePolicy}
+            releaseState={order.releaseState}
+          />
         </aside>
       </section>
     </AppShell>
   );
 }
 
-async function SettlementGate({
+function LifecycleFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border border-[#ebe7dc] bg-[#faf9f4] px-3 py-2">
+      <dt className="text-[#667064]">{label}</dt>
+      <dd className="text-right font-semibold">{value}</dd>
+    </div>
+  );
+}
+
+async function LifecycleGate({
+  fulfilmentState,
+  orderChannel,
   orderId,
-  paymentStatus
+  paymentStatus,
+  releasePolicy,
+  releaseState
 }: {
+  fulfilmentState: string | null;
+  orderChannel: string;
   orderId: string;
   paymentStatus: string;
+  releasePolicy: string | null;
+  releaseState: string | null;
 }) {
   const context = await requireWorkspaceContext();
 
-  if (paymentStatus !== "UNPAID" || !roleIn(context.role, SETTLEMENT_ROLES)) {
+  if (
+    paymentStatus === "UNPAID" &&
+    roleIn(context.role, SETTLEMENT_ROLES)
+  ) {
+    return <OrderLifecycleForm actionKind="settlement" orderId={orderId} />;
+  }
+
+  if (
+    paymentStatus === "PAID" &&
+    releasePolicy === "RELEASE_BY_AUTHORISED_STAFF" &&
+    releaseState === "NOT_RELEASED" &&
+    roleIn(context.role, SETTLEMENT_ROLES)
+  ) {
+    return <OrderLifecycleForm actionKind="release" orderId={orderId} />;
+  }
+
+  if (
+    (orderChannel === "table" || orderChannel === "qr") &&
+    fulfilmentState === "READY_FOR_HANDOFF" &&
+    roleIn(context.role, ORDER_ENTRY_ROLES)
+  ) {
+    return <OrderLifecycleForm actionKind="served" orderId={orderId} />;
+  }
+
+  if (!roleIn(context.role, SETTLEMENT_ROLES) && !roleIn(context.role, ORDER_ENTRY_ROLES)) {
     return (
       <StatePanel title="Settlement">
         Settlement is unavailable for this order state or role.
@@ -164,5 +260,9 @@ async function SettlementGate({
     );
   }
 
-  return <SettlementForm orderId={orderId} />;
+  return (
+    <StatePanel title="Lifecycle actions">
+      No lifecycle action is currently available for this order state.
+    </StatePanel>
+  );
 }

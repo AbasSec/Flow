@@ -140,7 +140,7 @@ export function PublicMenuClient({
             <div>
               <h2 className="text-base font-semibold">Your order</h2>
               <p className="mt-1 text-xs text-[#60685f]">
-                Sent to the kitchen now. Pay at the counter.
+                Sent to staff first. Pay at the counter before kitchen starts.
               </p>
             </div>
             <div className="text-right">

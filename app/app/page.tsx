@@ -6,7 +6,9 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { AppShell, Badge, StatePanel, Surface } from "@/components/flow-ui";
 import { formatSen } from "@/lib/format";
 import { getDashboardData } from "@/lib/services/dashboard";
+import { getOutletLifecycleMode } from "@/lib/services/orders";
 import { getFirstTableQrSource } from "@/lib/services/public-ordering";
+import { LifecycleActivationPanel } from "./lifecycle-panel";
 
 export const dynamic = "force-dynamic";
 const PRODUCTION_PUBLIC_ORIGIN = "https://flow-ops-rho.vercel.app";
@@ -132,6 +134,12 @@ export default async function AppPage() {
   }
 
   const data = result.data;
+  const outletLifecycle =
+    data.context.role === "organisation_owner"
+      ? await getOutletLifecycleMode(data.context.orgId).then((r) =>
+          r.ok ? r.data : null
+        )
+      : null;
   const tableQrSource = await getFirstTableQrSource(data.context.orgId);
   const requestHeaders = await headers();
   const origin = getTrustedPublicOrigin(requestHeaders);
@@ -257,7 +265,7 @@ export default async function AppPage() {
             <h2 className="mt-4 text-2xl font-semibold">Table QR</h2>
             <p className="mt-3 text-sm leading-6 text-[#dfe7da]">
               Scan to open the customer menu for one BrewBite table. Orders are
-              sent to the kitchen and paid at the counter.
+              received for pay-at-counter settlement before kitchen release.
             </p>
           </div>
           <div>
@@ -298,6 +306,21 @@ export default async function AppPage() {
           </div>
         </div>
       </Surface>
+
+      {outletLifecycle && (
+        <Surface className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#667064]">
+            Outlet controls
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">Lifecycle activation</h2>
+          <div className="mt-4">
+            <LifecycleActivationPanel
+              lifecycleMode={outletLifecycle.lifecycleMode}
+              outletId={outletLifecycle.outletId}
+            />
+          </div>
+        </Surface>
+      )}
     </AppShell>
   );
 }

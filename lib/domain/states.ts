@@ -76,9 +76,6 @@ export function getNextKitchenTicketStatus(
   if (status === "PREPARING") {
     return "READY";
   }
-  if (status === "READY") {
-    return "COMPLETED";
-  }
 
   return null;
 }

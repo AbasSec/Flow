@@ -52,6 +52,10 @@ export type OrderSummary = {
   tableLabel: string | null;
   serviceStatus: string;
   paymentStatus: string;
+  releasePolicy: string | null;
+  releaseState: string | null;
+  fulfilmentState: string | null;
+  closureState: string | null;
   totalSen: number;
   createdAt: string;
 };
@@ -59,9 +63,14 @@ export type OrderSummary = {
 export type OrderDetail = {
   id: string;
   outletId: string;
+  orderChannel: string;
   tableLabel: string | null;
   serviceStatus: string;
   paymentStatus: string;
+  releasePolicy: string | null;
+  releaseState: string | null;
+  fulfilmentState: string | null;
+  closureState: string | null;
   subtotalSen: number;
   totalSen: number;
   createdAt: string;
@@ -94,8 +103,13 @@ type MenuRow = {
 type OrderRow = {
   id: string;
   outlet_id: string;
+  order_channel: string;
   service_status: string;
   payment_status: string;
+  release_policy: string | null;
+  release_state: string | null;
+  fulfilment_state: string | null;
+  closure_state: string | null;
   subtotal_sen: number;
   total_sen: number;
   created_at: string;
@@ -132,6 +146,89 @@ function firstTableLabel(
   }
 
   return row?.table_label ?? null;
+}
+
+export type OutletLifecycleInfo = {
+  outletId: string;
+  lifecycleMode: string;
+};
+
+export async function getOutletLifecycleMode(
+  orgId: string
+): Promise<ServiceResult<OutletLifecycleInfo>> {
+  try {
+    const admin = requireAdminClient();
+    const { data, error } = await admin
+      .from("outlets")
+      .select("id, lifecycle_mode")
+      .eq("org_id", orgId)
+      .eq("is_active", true)
+      .order("created_at")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      return { ok: false, reason: "error", message: "Outlet information is unavailable." };
+    }
+
+    if (!data) {
+      return { ok: false, reason: "not_found", message: "No active outlet found." };
+    }
+
+    const row = data as { id: string; lifecycle_mode: string };
+
+    return {
+      ok: true,
+      data: { outletId: row.id, lifecycleMode: row.lifecycle_mode ?? "LEGACY" }
+    };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
+}
+
+export async function enableOutletV31(
+  outletId: string
+): Promise<ServiceResult<{ outletId: string; changed: boolean }>> {
+  try {
+    const context = await requireWorkspaceContext();
+
+    if (context.role !== "organisation_owner") {
+      return {
+        ok: false,
+        reason: "forbidden",
+        message: "Only the Organisation Owner can activate V3.1 lifecycle mode."
+      };
+    }
+
+    const supabase = await createSupabaseServerClient();
+
+    if (!supabase) {
+      return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
+    }
+
+    const { data, error } = await supabase.rpc("flow_v3_1_enable_outlet_v3_1", {
+      target_outlet_id: outletId
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "Lifecycle mode could not be activated for this outlet."
+      };
+    }
+
+    const result = data as { outlet_id?: string; changed?: boolean } | null;
+
+    revalidatePath("/app");
+
+    return {
+      ok: true,
+      data: { outletId: result?.outlet_id ?? outletId, changed: result?.changed ?? false }
+    };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
 }
 
 export async function getPrimaryOutletId(orgId: string): Promise<string | null> {
@@ -233,7 +330,7 @@ export async function createTableOrder(input: unknown): Promise<ServiceResult<{ 
       return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
     }
 
-    const { data, error } = await supabase.rpc("flow_m3_create_table_order", {
+    const { data, error } = await supabase.rpc("flow_v3_1_create_table_order", {
       target_table_session_id: parsed.tableSessionId,
       order_items: parsed.items.map((item) => ({
         menu_item_id: item.menuItemId,
@@ -243,7 +340,11 @@ export async function createTableOrder(input: unknown): Promise<ServiceResult<{ 
     });
 
     if (error) {
-      return { ok: false, reason: "error", message: error.message };
+      return {
+        ok: false,
+        reason: "error",
+        message: "Order could not be created. Check table, menu availability, and stock, then try again."
+      };
     }
 
     const result = data as { order_id?: string } | null;
@@ -281,17 +382,109 @@ export async function settleOrderManually(orderId: string): Promise<ServiceResul
       return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
     }
 
-    const { data, error } = await supabase.rpc("flow_m3_demo_manual_settlement", {
+    const { data, error } = await supabase.rpc("flow_v3_1_confirm_manual_settlement", {
       target_order_id: orderId
     });
 
     if (error) {
-      return { ok: false, reason: "error", message: error.message };
+      return {
+        ok: false,
+        reason: "error",
+        message: "Settlement could not be recorded for this order."
+      };
     }
 
     const result = data as { order_id?: string } | null;
 
     revalidatePath("/app");
+    revalidatePath(`/app/orders/${orderId}`);
+
+    return { ok: true, data: { orderId: result?.order_id ?? orderId } };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
+}
+
+export async function releaseOrderToKitchen(
+  orderId: string
+): Promise<ServiceResult<{ orderId: string }>> {
+  try {
+    const context = await requireWorkspaceContext();
+
+    if (!roleIn(context.role, SETTLEMENT_ROLES)) {
+      return {
+        ok: false,
+        reason: "forbidden",
+        message: "Only owner, admin, manager, or cashier can release this order."
+      };
+    }
+
+    const supabase = await createSupabaseServerClient();
+
+    if (!supabase) {
+      return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
+    }
+
+    const { data, error } = await supabase.rpc("flow_v3_1_release_order_to_kitchen", {
+      target_order_id: orderId
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "Order could not be released. Confirm settlement, outlet access, and stock availability."
+      };
+    }
+
+    const result = data as { order_id?: string } | null;
+
+    revalidatePath("/app");
+    revalidatePath("/app/kitchen");
+    revalidatePath(`/app/orders/${orderId}`);
+
+    return { ok: true, data: { orderId: result?.order_id ?? orderId } };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
+}
+
+export async function markOrderServed(
+  orderId: string
+): Promise<ServiceResult<{ orderId: string }>> {
+  try {
+    const context = await requireWorkspaceContext();
+
+    if (!roleIn(context.role, ["organisation_owner", "organisation_admin", "manager", "waiter"])) {
+      return {
+        ok: false,
+        reason: "forbidden",
+        message: "Only owner, admin, manager, or waiter can mark a dine-in order served."
+      };
+    }
+
+    const supabase = await createSupabaseServerClient();
+
+    if (!supabase) {
+      return { ok: false, reason: "unconfigured", message: "Supabase is not configured." };
+    }
+
+    const { data, error } = await supabase.rpc("flow_v3_1_mark_order_served", {
+      target_order_id: orderId
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "Order could not be marked served."
+      };
+    }
+
+    const result = data as { order_id?: string } | null;
+
+    revalidatePath("/app");
+    revalidatePath("/app/kitchen");
     revalidatePath(`/app/orders/${orderId}`);
 
     return { ok: true, data: { orderId: result?.order_id ?? orderId } };
@@ -308,7 +501,7 @@ export async function getRecentOrders(
   const { data, error } = await admin
     .from("orders")
     .select(
-      "id, service_status, payment_status, total_sen, created_at, table_sessions(table_label)"
+      "id, service_status, payment_status, release_policy, release_state, fulfilment_state, closure_state, total_sen, created_at, table_sessions(table_label)"
     )
     .eq("org_id", orgId)
     .order("created_at", { ascending: false })
@@ -323,6 +516,10 @@ export async function getRecentOrders(
     tableLabel: firstTableLabel(row.table_sessions),
     serviceStatus: row.service_status,
     paymentStatus: row.payment_status,
+    releasePolicy: row.release_policy,
+    releaseState: row.release_state,
+    fulfilmentState: row.fulfilment_state,
+    closureState: row.closure_state,
     totalSen: Number(row.total_sen),
     createdAt: row.created_at
   }));
@@ -336,7 +533,7 @@ export async function getOrderDetail(orderId: string): Promise<ServiceResult<Ord
     const { data: orderData, error: orderError } = await admin
       .from("orders")
       .select(
-        "id, outlet_id, service_status, payment_status, subtotal_sen, total_sen, created_at, table_sessions(table_label)"
+        "id, outlet_id, order_channel, service_status, payment_status, release_policy, release_state, fulfilment_state, closure_state, subtotal_sen, total_sen, created_at, table_sessions(table_label)"
       )
       .eq("id", orderId)
       .eq("org_id", context.orgId)
@@ -390,9 +587,14 @@ export async function getOrderDetail(orderId: string): Promise<ServiceResult<Ord
       data: {
         id: order.id,
         outletId: order.outlet_id,
+        orderChannel: order.order_channel,
         tableLabel: firstTableLabel(order.table_sessions),
         serviceStatus: order.service_status,
         paymentStatus: order.payment_status,
+        releasePolicy: order.release_policy,
+        releaseState: order.release_state,
+        fulfilmentState: order.fulfilment_state,
+        closureState: order.closure_state,
         subtotalSen: Number(order.subtotal_sen),
         totalSen: Number(order.total_sen),
         createdAt: order.created_at,

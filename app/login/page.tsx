@@ -1,13 +1,16 @@
+import { safeNextPath } from "@/lib/auth/next-path";
 import { signInAction } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  const nextPath = safeNextPath(params.next ?? null, "/app");
 
   return (
     <main className="min-h-screen bg-[#f7f7f2] text-[#1f2933]">
@@ -25,6 +28,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         ) : null}
         <form action={signInAction} className="mt-6 space-y-4">
+          <input name="next" type="hidden" value={nextPath} />
           <label className="block text-sm font-medium text-[#374151]">
             Email
             <input

@@ -39,7 +39,7 @@ describe("Milestone 3 vertical slice guards", () => {
     expect(getNextKitchenTicketStatus("NEW")).toBe("ACCEPTED");
     expect(getNextKitchenTicketStatus("ACCEPTED")).toBe("PREPARING");
     expect(getNextKitchenTicketStatus("PREPARING")).toBe("READY");
-    expect(getNextKitchenTicketStatus("READY")).toBe("COMPLETED");
+    expect(getNextKitchenTicketStatus("READY")).toBeNull();
     expect(getNextKitchenTicketStatus("COMPLETED")).toBeNull();
     expect(migration).toContain("Invalid kitchen ticket transition");
   });
