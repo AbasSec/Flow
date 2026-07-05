@@ -18,6 +18,15 @@
 </p>
 
 <p align="center">
+  <a href="./LICENSE">
+    <img
+      src="https://img.shields.io/badge/License-Apache--2.0-3B82F6?style=for-the-badge&logo=apache&logoColor=white"
+      alt="Licensed under Apache License 2.0"
+    >
+  </a>
+</p>
+
+<p align="center">
   <a href="https://flow-ops-rho.vercel.app">
     <img
       src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
@@ -47,7 +56,7 @@
   ·
   <a href="#how-flow-runs-an-order">How It Works</a>
   ·
-  <a href="#what-is-live-now">Current Build</a>
+  <a href="#what-is-live-now">Current Build and the live version NOW</a>
   ·
   <a href="#product-maturity-roadmap">Roadmap</a>
   ·
