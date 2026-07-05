@@ -24,6 +24,7 @@
       alt="Open the live Flow application"
     >
   </a>
+  <p>
   acc info for demo ONLY : owner@brewbite.demo / 123456
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
