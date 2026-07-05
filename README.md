@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=X1N5d-5AHeA">
-    <img src="https://img.shields.io/badge/Watch%20the%20Flow%20Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch the Flow demo on YouTube">
+  <a href="https://flow-ops-rho.vercel.app">
+    <img src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white" alt="Open the live Flow application">
   </a>
 </p>
 
@@ -32,6 +32,17 @@
 Food businesses often run ordering, payment, kitchen work, service, and management across disconnected tools. Flow is designed as an operational command system, not another menu website or a generic POS screen.
 
 Each role sees its next relevant action. Payment, release, kitchen progress, fulfilment, and closure are treated as separate business truths with separate owners. The product is built around scoped authority, trustworthy records, and controlled transitions instead of broad access and vague statuses.
+
+## See Flow in Action
+
+> A real walkthrough of Flow's operational workspaces: customer ordering, Counter, Kitchen, Floor & Service, and owner oversight.
+
+
+<p align="center">
+  <a href="https://youtu.be/0StGxEYKGZY">
+    Watch the extended Flow walkthrough on YouTube
+  </a>
+</p>
 
 ## Why Flow Is Different
 
@@ -122,16 +133,6 @@ Roadmap items are planned product maturity work, not claims that every capabilit
 | **Connectors - Planned V3.9** | Creates provider-neutral boundaries for future payment, accounting, POS, printer/KDS, supplier, and other approved integrations. |
 
 Future AI may explain trusted evidence, but it must never autonomously alter payments, inventory, prices, permissions, payroll, or historical records.
-
-## See Flow In Action
-
-Watch the Flow product walkthrough and see how customer orders move through controlled operational workspaces.
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=X1N5d-5AHeA">
-    <img src="https://img.shields.io/badge/Watch%20the%20Flow%20Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch the Flow demo on YouTube">
-  </a>
-</p>
 
 ## Technical Architecture
 
