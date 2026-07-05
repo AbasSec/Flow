@@ -16,6 +16,13 @@ const createPublicOrderSchema = z.object({
   requestKey: z.string().min(8).max(120)
 });
 
+const createPublicOutletOrderSchema = z.object({
+  outletToken: z.string().min(32).max(128),
+  tableToken: z.string().min(32).max(128),
+  items: z.array(publicOrderItemSchema).min(1).max(20),
+  requestKey: z.string().min(8).max(120)
+});
+
 export type PublicMenuItem = {
   publicMenuToken: string;
   name: string;
@@ -54,6 +61,22 @@ export type TableQrSource = {
   tableToken: string;
 };
 
+export type PublicOutletTable = {
+  tableLabel: string;
+  publicTableToken: string;
+};
+
+export type PublicOutletMenu = {
+  outletName: string;
+  paymentLabel: string;
+  tables: PublicOutletTable[];
+  categories: PublicMenuCategory[];
+};
+
+export type OutletQrSource = {
+  outletToken: string;
+};
+
 type PublicMenuRpc = {
   found?: boolean;
   outlet_name?: string;
@@ -84,6 +107,26 @@ type PublicCreateRpc = {
   idempotent?: boolean;
   payment_status?: string;
   payment_label?: string;
+};
+
+type PublicOutletMenuRpc = {
+  found?: boolean;
+  outlet_name?: string;
+  payment_label?: string;
+  tables?: Array<{
+    table_label?: string;
+    public_table_token?: string;
+  }>;
+  categories?: Array<{
+    name?: string;
+    items?: Array<{
+      public_menu_token?: string;
+      name?: string;
+      description?: string | null;
+      price_sen?: number;
+      available?: boolean;
+    }>;
+  }>;
 };
 
 export async function getPublicTableMenu(
@@ -133,6 +176,58 @@ export async function getPublicTableMenu(
   }
 }
 
+export async function getPublicOutletMenu(
+  outletToken: string
+): Promise<ServiceResult<PublicOutletMenu>> {
+  try {
+    const supabase = createSupabasePublicClient();
+
+    if (!supabase) {
+      return { ok: false, reason: "unconfigured", message: "Ordering is not configured." };
+    }
+
+    const { data, error } = await supabase.rpc("flow_m4_public_outlet_menu", {
+      outlet_token: outletToken
+    });
+
+    if (error) {
+      return { ok: false, reason: "error", message: "This outlet menu is unavailable." };
+    }
+
+    const menu = data as PublicOutletMenuRpc | null;
+
+    if (!menu?.found) {
+      return { ok: false, reason: "not_found", message: "This outlet link is unavailable." };
+    }
+
+    return {
+      ok: true,
+      data: {
+        outletName: menu.outlet_name ?? "BrewBite Kitchen",
+        paymentLabel: menu.payment_label ?? "Pay at counter",
+        tables: (menu.tables ?? [])
+          .filter((t) => Boolean(t.table_label && t.public_table_token))
+          .map((t) => ({
+            tableLabel: t.table_label!,
+            publicTableToken: t.public_table_token!
+          })),
+        categories: (menu.categories ?? []).map((category) => ({
+          name: category.name ?? "Menu",
+          items: (category.items ?? []).map((item) => ({
+            publicMenuToken: item.public_menu_token ?? "",
+            name: item.name ?? "Item",
+            description: item.description ?? null,
+            priceSen: Number(item.price_sen ?? 0),
+            available: Boolean(item.available)
+          }))
+        }))
+      }
+    };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
+}
+
 export async function createPublicQrOrder(
   input: unknown
 ): Promise<ServiceResult<{ publicOrderId: string; idempotent: boolean }>> {
@@ -145,6 +240,55 @@ export async function createPublicQrOrder(
     }
 
     const { data, error } = await supabase.rpc("flow_m4_create_qr_table_order", {
+      target_table_token: parsed.tableToken,
+      order_items: parsed.items.map((item) => ({
+        public_menu_token: item.publicMenuToken,
+        quantity: item.quantity
+      })),
+      request_key: parsed.requestKey
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "One or more items are unavailable. Please refresh the menu."
+      };
+    }
+
+    const result = data as PublicCreateRpc | null;
+
+    if (!result?.public_order_id) {
+      return { ok: false, reason: "error", message: "Order submission failed." };
+    }
+
+    revalidatePath(`/order/${result.public_order_id}`);
+
+    return {
+      ok: true,
+      data: {
+        publicOrderId: result.public_order_id,
+        idempotent: Boolean(result.idempotent)
+      }
+    };
+  } catch (error) {
+    return { ok: false, reason: "error", message: serviceError(error) };
+  }
+}
+
+export async function createPublicOutletQrOrder(
+  input: unknown
+): Promise<ServiceResult<{ publicOrderId: string; idempotent: boolean }>> {
+  try {
+    const parsed = createPublicOutletOrderSchema.parse(input);
+    const supabase = createSupabasePublicClient();
+
+    if (!supabase) {
+      return { ok: false, reason: "unconfigured", message: "Ordering is not configured." };
+    }
+
+    const { data, error } = await supabase.rpc("flow_m4_create_outlet_qr_order", {
+      outlet_token: parsed.outletToken,
       target_table_token: parsed.tableToken,
       order_items: parsed.items.map((item) => ({
         public_menu_token: item.publicMenuToken,
@@ -269,7 +413,7 @@ export async function getFirstTableQrSource(
     public_token_expires_at: string | null;
   } | null;
 
-  if (!isValidPublicTableToken(row?.public_table_token)) {
+  if (!isValidPublicToken(row?.public_table_token)) {
     return null;
   }
 
@@ -279,6 +423,33 @@ export async function getFirstTableQrSource(
   };
 }
 
-function isValidPublicTableToken(token: string | null | undefined): token is string {
+export async function getOutletQrSource(
+  orgId: string
+): Promise<OutletQrSource | null> {
+  const admin = requireAdminClient();
+  const { data, error } = await admin
+    .from("outlets")
+    .select("public_outlet_token")
+    .eq("org_id", orgId)
+    .eq("is_active", true)
+    .not("public_outlet_token", "is", null)
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const row = data as { public_outlet_token: string | null } | null;
+
+  if (!isValidPublicToken(row?.public_outlet_token)) {
+    return null;
+  }
+
+  return { outletToken: row.public_outlet_token };
+}
+
+function isValidPublicToken(token: string | null | undefined): token is string {
   return Boolean(token && /^[A-Za-z0-9_-]{32,128}$/.test(token));
 }

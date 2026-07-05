@@ -83,25 +83,30 @@ describe("public tracking alignment guards", () => {
     );
     expect(dashboardPage).toContain("process.env.NEXT_PUBLIC_APP_URL?.trim()");
     expect(dashboardPage).toContain("localhost");
-    expect(dashboardPage).toContain("isValidPublicTableToken(tableQrSource?.tableToken)");
-    expect(dashboardPage).toContain("/^[A-Za-z0-9_-]{32,128}$/.test(token)");
-    expect(dashboardPage).toContain("`${origin}/t/${tableQrSource.tableToken}`");
-    expect(dashboardPage).not.toContain("`${origin}/t/${tableQrSource?.tableToken}`");
+    // V3.2: token validation moved to getOutletQrSource in service; dashboard checks null via outletQrSource
+    expect(dashboardPage).toContain("outletQrSource");
+    // V3.2: token format regex lives in the service layer
+    expect(publicOrderingService).toContain("/^[A-Za-z0-9_-]{32,128}$/.test(token)");
+    // V3.2: URL uses /o/ prefix with outlet-level token
+    expect(dashboardPage).toContain("`${origin}/o/${outletQrSource.outletToken}`");
   });
 
   it("uses the exact same complete tokenized URL for QR payload and open link", () => {
-    expect(dashboardPage).toContain("QRCode.toDataURL(tableQrUrl");
-    expect(dashboardPage).toContain("href={tableQrUrl}");
-    expect(dashboardPage).toContain("Open table link");
+    // V3.2: outlet-level QR URL variables
+    expect(dashboardPage).toContain("QRCode.toDataURL(outletQrUrl");
+    expect(dashboardPage).toContain("href={outletQrUrl}");
+    expect(dashboardPage).toContain("Open outlet ordering link");
   });
 
   it("hides QR and links when no active unexpired opaque token exists", () => {
     expect(publicOrderingService).toContain(".in(\"status\", [\"AVAILABLE\", \"OPEN\"])");
     expect(publicOrderingService).toContain(".not(\"public_token_expires_at\", \"is\", null)");
     expect(publicOrderingService).toContain(".gt(\"public_token_expires_at\", new Date().toISOString())");
-    expect(publicOrderingService).toContain("isValidPublicTableToken(row?.public_table_token)");
-    expect(dashboardPage).toContain("tableQrSource && tableQrDataUrl && tableQrUrl");
-    expect(dashboardPage).toContain("Table QR links will appear here");
+    // V3.2: isValidPublicTableToken renamed to isValidPublicToken
+    expect(publicOrderingService).toContain("isValidPublicToken(row?.public_table_token)");
+    // V3.2: outlet-level QR conditional rendering
+    expect(dashboardPage).toContain("outletQrSource && outletQrDataUrl && outletQrUrl");
+    expect(dashboardPage).toContain("Outlet QR links will appear here");
   });
 
   it("preserves public RPC grant hardening without direct anonymous table grants", () => {
