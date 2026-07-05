@@ -27,6 +27,7 @@
   <p>
   acc info for demo ONLY : owner@brewbite.demo / 123456
   </p>
+  <p>
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
       src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-PLAY%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
