@@ -61,22 +61,26 @@
 > See Flow move one customer order through the public ordering experience, Counter, Kitchen, Floor & Service, and owner oversight.
 
 <p align="center">
-  <a href="https://youtu.be/0StGxEYKGZY">
+  <a href="https://youtu.be/0StGxEYKGZY" title="Play the Flow product walkthrough on YouTube">
     <img
-      src="https://img.youtube.com/vi/0StGxEYKGZY/maxresdefault.jpg"
-      alt="Play the Flow product walkthrough on YouTube"
+      src="./assets/branding/flow-walkthrough-thumbnail.jpeg"
+      alt="Play the Flow product walkthrough — click to watch"
       width="900"
     >
   </a>
 </p>
 
 <p align="center">
+  <strong>▶ CLICK THE PREVIEW ABOVE TO PLAY THE FLOW WALKTHROUGH</strong>
+</p>
+
+<p align="center">
   <a href="https://youtu.be/0StGxEYKGZY">
-    ▶ Play the Flow product walkthrough
+    ▶ Watch the full product walkthrough on YouTube
   </a>
   &nbsp;·&nbsp;
   <a href="./assets/branding/FLOW.mp4">
-    Open the repository MP4
+    Open the full walkthrough MP4
   </a>
   &nbsp;·&nbsp;
   <a href="https://flow-ops-rho.vercel.app">
@@ -84,8 +88,8 @@
   </a>
 </p>
 
-> [!TIP]
-> The preview above is intentionally visible in GitHub README rendering and opens the full walkthrough on YouTube. GitHub does not reliably render repository-hosted `.mp4` files as inline README players. When a GitHub attachment URL is available, replace the preview block with that `github.com/user-attachments/assets/...` URL to use GitHub’s native player.
+> [!NOTE]
+> The clickable preview uses `assets/branding/flow-walkthrough-thumbnail.jpeg`. Keep that image in the repository beside `FLOW.mp4` so GitHub can show the walkthrough preview directly inside the README.
 
 ---
 
