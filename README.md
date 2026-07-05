@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  Flow routes the right work to the right people, protects important lifecycle transitions,
-  preserves trustworthy records, and turns disconnected food-business operations into one controlled flow.
+  Flow brings public ordering, Counter, Kitchen, Floor &amp; Service, and owner oversight
+  into one role-aware operating system for food businesses.
 </p>
 
 <p align="center">
@@ -26,8 +26,8 @@
   </a>
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
-      src="https://img.shields.io/badge/WALKTHROUGH-WATCH%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
-      alt="Watch the Flow walkthrough on YouTube"
+      src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-WATCH%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
+      alt="Watch the Flow product walkthrough on YouTube"
     >
   </a>
 </p>
@@ -43,9 +43,11 @@
 <p align="center">
   <a href="#watch-flow-in-action">Watch</a>
   ·
-  <a href="#what-flow-controls">What Flow Controls</a>
+  <a href="#flow-today">Flow Today</a>
   ·
-  <a href="#current-product-foundation">Current Build</a>
+  <a href="#how-flow-runs-an-order">How It Works</a>
+  ·
+  <a href="#what-is-live-now">Current Build</a>
   ·
   <a href="#product-maturity-roadmap">Roadmap</a>
   ·
@@ -56,55 +58,56 @@
 
 ## Watch Flow in Action
 
-> Follow a Flow order from public QR entry to Counter, Kitchen, Floor & Service, and owner oversight.
-
-<!-- Replace only the src URL below with a github.com/user-attachments/assets/... URL later if one is available. -->
-
-<div align="center">
-  <video
-    src="https://raw.githubusercontent.com/AbasSec/Flow/main/assets/branding/FLOW.mp4"
-    poster="./assets/branding/logo.jpeg"
-    width="900"
-    controls
-  ></video>
-</div>
+> See Flow move one customer order through the public ordering experience, Counter, Kitchen, Floor & Service, and owner oversight.
 
 <p align="center">
-  <a href="./assets/branding/FLOW.mp4">▶ Open the full Flow walkthrough (.mp4)</a>
-  &nbsp;·&nbsp;
-  <a href="https://youtu.be/0StGxEYKGZY">Watch on YouTube</a>
-  &nbsp;·&nbsp;
-  <a href="https://flow-ops-rho.vercel.app">Open the live Flow application and use these as login info , acc : owner@brewbite.demo , 123456 </a>
+  <a href="https://youtu.be/0StGxEYKGZY">
+    <img
+      src="https://img.youtube.com/vi/0StGxEYKGZY/maxresdefault.jpg"
+      alt="Play the Flow product walkthrough on YouTube"
+      width="900"
+    >
+  </a>
 </p>
 
-> [!NOTE]
-> The repository stores the walkthrough at `assets/branding/FLOW.mp4`. If GitHub does not render the repository-hosted video inline, the MP4 and YouTube links above remain available.
+<p align="center">
+  <a href="https://youtu.be/0StGxEYKGZY">
+    ▶ Play the Flow product walkthrough
+  </a>
+  &nbsp;·&nbsp;
+  <a href="./assets/branding/FLOW.mp4">
+    Open the repository MP4
+  </a>
+  &nbsp;·&nbsp;
+  <a href="https://flow-ops-rho.vercel.app">
+    Open the live Flow application
+  </a>
+</p>
+
+> [!TIP]
+> The preview above is intentionally visible in GitHub README rendering and opens the full walkthrough on YouTube. GitHub does not reliably render repository-hosted `.mp4` files as inline README players. When a GitHub attachment URL is available, replace the preview block with that `github.com/user-attachments/assets/...` URL to use GitHub’s native player.
 
 ---
 
-## What Flow Controls
+## Flow Today
 
-| Customer | Operations Team | Business Owner |
+| Customer experience | Operations workspace | Business control |
 | --- | --- | --- |
-| Safe public QR ordering and narrow order tracking | Counter, Kitchen, and Floor & Service each receive the work they own | Clear lifecycle evidence, controlled decisions, and accountable operational records |
+| Public outlet QR ordering, table context, and safe order tracking | Counter, Kitchen, and Floor & Service each own a distinct part of the workflow | Owner visibility, lifecycle evidence, audit records, and controlled operational decisions |
 
-> **One customer order becomes accountable work across Counter, Kitchen, Floor & Service, and owner oversight—without collapsing payment, release, preparation, fulfilment, and closure into one vague status.**
+> **Flow is not just a menu or POS screen. It is the operational layer that turns customer demand into accountable staff work and business truth.**
 
-## Why Flow Is Different
+### Built for the way food businesses actually operate
 
-| Ordinary ordering flow | Flow operational model |
-| --- | --- |
-| Captures an order | Routes accountable work |
-| Shows one generic status | Keeps payment, release, Kitchen, fulfilment, and closure separate |
-| Gives broad access | Enforces role, outlet, and station scope |
-| Records activity | Preserves evidence and operational records |
-| Focuses on transactions | Builds toward controlled operational decisions |
-
-> **Flow is not another menu website or generic POS screen. It is the operational layer between customer demand, staff execution, and accountable business control.**
+- **Customers** need a simple, mobile-first way to browse, submit permitted orders, and see only safe order status.
+- **Counter staff** need a normal workspace for settlement and authorised release—not an owner dashboard.
+- **Kitchen staff** need only the station work they own, with a clear preparation lifecycle.
+- **Floor & Service** needs a ready-to-serve queue and controlled served confirmation.
+- **Owners and managers** need to understand what is happening without taking over every operational task.
 
 ---
 
-## The Flow Operating Model
+## How Flow Runs an Order
 
 ```mermaid
 flowchart LR
@@ -112,7 +115,7 @@ flowchart LR
     B[Counter<br/>Settlement & Authorised Release]
     C[Kitchen<br/>NEW → ACCEPTED → PREPARING → READY]
     D[Floor & Service<br/>SERVED]
-    E[Owner / Manager<br/>Oversight & Records]
+    E[Owner / Manager<br/>Oversight, Records & Exceptions]
 
     A --> B
     B --> C
@@ -122,47 +125,73 @@ flowchart LR
 
 > **Payment, release, Kitchen progress, fulfilment, and closure are separate business truths. Flow does not hide them behind one misleading generic status.**
 
+### The current operating rules
+
+| Step | What happens | Who owns it |
+| --- | --- | --- |
+| Public order | A customer enters through an outlet or table-scoped public route and receives only safe context | Customer |
+| Settlement | Pay-at-counter orders remain unpaid until authorised staff record settlement | Counter |
+| Release | Settlement alone does not start Kitchen work; authorised release is a separate action | Counter |
+| Preparation | Kitchen progresses only its assigned station work: `NEW → ACCEPTED → PREPARING → READY` | Kitchen |
+| Service | Ready dine-in work becomes served through Floor & Service | Floor & Service |
+| Oversight | Owner and manager views surface work, records, risks, and exceptions | Owner / Manager |
+
 ---
 
-## Current Product Foundation
+## What Is Live Now
 
-### ✅ Implemented / Locked
+### Public ordering and customer safety
 
-- Protected staff workspace and Supabase authentication foundation.
-- Tenant and Row Level Security migration foundation.
-- F&B demo data model.
-- Staff table ordering and Kitchen board.
-- Inventory-backed order flow.
-- Owner dashboard and Flow Connect foundation.
-- Table-token QR ordering and safe public order tracking.
-- Manual demo settlement plus audit/outbox foundation.
-- Zod validation boundaries and lifecycle regression coverage.
+- Outlet-level public QR entry is implemented in the repository.
+- Customers can enter a table-scoped ordering context through the public flow.
+- Existing table-token ordering remains available for compatibility during the transition.
+- Public tracking returns narrow customer-safe status rather than internal operational records.
+- Public routes use opaque tokens and scoped projections.
 
-### 🛠️ Current Milestone — V3.1 / V3.2
+### Counter, Kitchen, and Floor & Service
 
-- Counter settlement and authorised-release queues.
-- Floor & Service ready-to-serve workflow.
-- Dashboard routing toward the correct operational workspace.
-- Role, outlet, and station-aware private reads.
-- Kitchen lifecycle stops at `READY`.
-- User-safe errors and lifecycle regression coverage.
-- One-outlet QR entry, table selection, and outlet/table server binding.
+- **Counter** supports the normal QR pay-at-counter workflow: queue visibility, manual demo settlement, and authorised release.
+- **Kitchen** is station-aware and stops at `READY`; it cannot settle, release, serve, collect, or close orders.
+- **Floor & Service** supports table-service ordering, a ready-to-serve queue, and served confirmation.
+- **Dashboard** is for oversight, evidence, risks, and exceptions—not the normal Counter payment/release queue.
 
-### ➡️ Next
+### Business foundations
 
-- Short-lived public ordering contexts.
-- HTTP-level rate limiting and replay / abuse controls.
-- Compatibility handling around existing `/t/[tableToken]` routes.
-
-### 🗺️ Planned
-
-Dynamic menu management, people and employment foundation, command and records centre, completed counter/table workflows, cost truth, deterministic Flow Analysis, provider-neutral connectors, reporting, notifications, observability, backups, and CI/CD hardening.
+- Protected private workspaces and Supabase authentication foundation.
+- Tenant and outlet boundaries with Row Level Security migration foundation.
+- F&B demo tenant, menu, table, station, and operational seed data.
+- Table ordering, Kitchen board, inventory-backed order flow, and safe public tracking.
+- Owner dashboard and Flow Connect communication foundation.
+- Audit/outbox foundation, Zod validation boundaries, idempotency safeguards, and lifecycle regression coverage.
 
 > [!IMPORTANT]
-> - QR ordering is pay-at-counter. No real payment gateway, POS, terminal, accounting, or delivery connector is implemented.
-> - `DEMO_MANUAL_SETTLEMENT` is a manual demo settlement action, not a payment integration.
-> - Public routes use opaque tokens and safe projections; they do not expose internal operational records.
-> - V3 lifecycle and V3.2 migration work is local/review-stage unless separately applied and deployed.
+> - QR ordering is currently **pay at counter**. No real payment gateway, physical terminal, POS, accounting, or delivery connector is claimed as implemented.
+> - `DEMO_MANUAL_SETTLEMENT` is a controlled demo settlement action, not a payment-provider integration.
+> - Public routes never expose internal operations, staff data, payment internals, inventory, audit records, or Flow Connect.
+> - Deployed behaviour depends on the target environment having the required migrations and demo data applied.
+
+---
+
+## Open the Demo
+
+<p align="center">
+  <a href="https://flow-ops-rho.vercel.app">
+    <img
+      src="https://img.shields.io/badge/OPEN%20THE%20LIVE%20DEMO-flow--ops--rho.vercel.app-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
+      alt="Open the Flow live demo"
+    >
+  </a>
+</p>
+
+Use this **demo-only** owner account:
+
+```text
+Email:    owner@brewbite.demo
+Password: 123456
+```
+
+> [!NOTE]
+> This account is for the BrewBite demonstration environment only. Do not reuse the password for a real business account.
 
 ---
 
@@ -183,28 +212,28 @@ Dynamic menu management, people and employment foundation, command and records c
 ## Trust and Safety by Design
 
 > **Role authority**  
-> Actions are limited by the user’s authorised role and server-side checks.
+> Server-side checks limit actions to the user’s authorised role.
 
 > **Outlet and station scope**  
-> Operational access is restricted to the correct business location and Kitchen station.
+> Operational access is restricted to the correct outlet and Kitchen station.
 
-> **Safe public QR boundaries**  
+> **Public QR boundaries**  
 > Public tokens expose only the minimum customer-facing context.
 
 > **Lifecycle truth**  
-> No generic status hides whether payment, release, Kitchen, fulfilment, or closure occurred.
+> No generic status hides whether payment, release, preparation, fulfilment, or closure occurred.
 
 > **Auditability**  
-> Sensitive actions preserve actor, time, scope, reason, and evidence where applicable.
+> Sensitive operations preserve actor, time, scope, reason, and evidence where applicable.
 
 > **No fake operational claims**  
-> UI states, redirects, messages, or customer claims never prove payment or completed fulfilment.
+> Redirects, browser states, messages, or customer claims never prove payment or completed fulfilment.
 
 ---
 
 ## Product Maturity Roadmap
 
-> Roadmap items are planned product maturity work, not claims that every capability is already implemented.
+> Roadmap items are product maturity work—not claims that every capability is already completed.
 
 | Version | Focus | Outcome |
 | --- | --- | --- |
@@ -225,15 +254,15 @@ Dynamic menu management, people and employment foundation, command and records c
 
 ### Deterministic Flow Analysis — Planned V3.8
 
-Evidence-backed explanations of what is happening, why it matters, what should happen next, and which role should act.
+Flow Analysis will explain what is happening, why it matters, what should happen next, and which authorised role should act.
 
 ### Command and Records — Planned V3.5
 
-Live operations, scoped records, accountability, and role-aware business control.
+A stronger owner and admin control surface for live operations, scoped records, accountability, and decisions.
 
 ### People and Cost Truth — Planned V3.4 / V3.7
 
-Employment context, delegated authority, suppliers, expenses, COGS, labour inputs, and honest profitability labels.
+Employment context, delegated authority, supplier and expense evidence, COGS, labour inputs, and honest profitability labels.
 
 > **Future AI may explain trusted evidence, but it must never autonomously alter payments, inventory, prices, permissions, payroll, or historical records.**
 
@@ -252,18 +281,18 @@ flowchart LR
     A --> B --> C --> D --> E
 ```
 
-| Layer | Verified in repository |
+| Layer | Current implementation direction |
 | --- | --- |
 | Full-stack application | Next.js App Router 16 and React 19 |
 | Language | TypeScript strict mode |
 | Styling | Tailwind CSS 4 via PostCSS |
-| Database / auth | Supabase clients, migrations, RLS helpers, protected `/app/**` guard |
+| Database and auth | Supabase clients, migrations, RLS helpers, protected `/app/**` guard |
 | Validation | Zod at service and action boundaries |
-| Public QR | Opaque outlet, table, menu, and order tokens with safe projections |
+| Public ordering | Opaque outlet, table, menu, and order tokens with safe projections |
 | Testing | Vitest, Testing Library packages, SQL regression scripts, static regression tests |
 | Local tooling | pnpm 10, Supabase CLI scripts, BrewBite seed script |
 
-> **Database commit is truth. Realtime and refresh behavior are signals after committed state, not the authority.**
+> **Database commit is truth. Realtime and refresh behaviour are signals after committed state, not the authority.**
 
 ---
 
@@ -351,7 +380,7 @@ Flow includes:
 ```text
 flow/
 ├── app/                  # Public, login, and staff workspace routes
-├── assets/branding/      # Logo and Flow walkthrough video
+├── assets/branding/      # Flow logo and walkthrough media
 ├── components/           # Shared UI components
 ├── docs/                 # Decision locks, PRD, reports, and roadmap
 ├── lib/                  # Auth, services, validation, and domain logic
