@@ -35,12 +35,21 @@ Each role sees its next relevant action. Payment, release, kitchen progress, ful
 
 ## See Flow in Action
 
-> A real walkthrough of Flow's operational workspaces: customer ordering, Counter, Kitchen, Floor & Service, and owner oversight.
-
+> A real walkthrough of Flow’s operational workspaces: customer ordering, Counter, Kitchen, Floor & Service, and owner oversight.
 
 <p align="center">
   <a href="https://youtu.be/0StGxEYKGZY">
-    Watch the extended Flow walkthrough on YouTube
+    <img
+      src="./assets/branding/flow-walkthrough-thumbnail.jpeg"
+      alt="Watch the Flow product walkthrough on YouTube"
+      width="900"
+    >
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/0StGxEYKGZY">
+    ▶ Watch the full Flow walkthrough on YouTube
   </a>
 </p>
 
