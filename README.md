@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  Flow brings public ordering, Counter, Kitchen, Floor &amp; Service, and owner oversight
+  Flow connects public ordering, Counter, Kitchen, Floor &amp; Service, and owner oversight
   into one role-aware operating system for food businesses.
 </p>
 
@@ -26,8 +26,8 @@
   </a>
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
-      src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-WATCH%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
-      alt="Watch the Flow product walkthrough on YouTube"
+      src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-PLAY%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
+      alt="Play the Flow product walkthrough on YouTube"
     >
   </a>
 </p>
@@ -43,7 +43,7 @@
 <p align="center">
   <a href="#watch-flow-in-action">Watch</a>
   ·
-  <a href="#flow-today">Flow Today</a>
+  <a href="#flow-as-a-product">Product</a>
   ·
   <a href="#how-flow-runs-an-order">How It Works</a>
   ·
@@ -58,56 +58,62 @@
 
 ## Watch Flow in Action
 
-> See Flow move one customer order through the public ordering experience, Counter, Kitchen, Floor & Service, and owner oversight.
+> Follow a Flow order from public QR entry to Counter, Kitchen, Floor & Service, and owner oversight.
 
+<!-- This preview uses YouTube's hosted thumbnail. It does not require any local thumbnail asset. -->
 <p align="center">
-  <a href="https://youtu.be/0StGxEYKGZY" title="Play the Flow product walkthrough on YouTube">
+  <a href="https://youtu.be/0StGxEYKGZY" title="Click to play the full Flow walkthrough on YouTube">
     <img
-      src="./assets/branding/flow-walkthrough-thumbnail.jpeg"
-      alt="Play the Flow product walkthrough — click to watch"
+      src="https://img.youtube.com/vi/0StGxEYKGZY/maxresdefault.jpg"
+      alt="Flow product walkthrough preview — click to play on YouTube"
       width="900"
     >
   </a>
 </p>
 
 <p align="center">
-  <strong>▶ CLICK THE PREVIEW ABOVE TO PLAY THE FLOW WALKTHROUGH</strong>
+  <a href="https://youtu.be/0StGxEYKGZY">
+    <img
+      src="https://img.shields.io/badge/%E2%96%B6%20CLICK%20THE%20PREVIEW%20TO%20PLAY-FLOW%20WALKTHROUGH-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
+      alt="Click the preview to play the Flow walkthrough"
+    >
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/0StGxEYKGZY">
-    ▶ Watch the full product walkthrough on YouTube
-  </a>
+  <a href="https://youtu.be/0StGxEYKGZY">Watch on YouTube</a>
   &nbsp;·&nbsp;
-  <a href="./assets/branding/FLOW.mp4">
-    Open the full walkthrough MP4
-  </a>
+  <a href="./assets/branding/FLOW.mp4">Open the repository MP4</a>
   &nbsp;·&nbsp;
-  <a href="https://flow-ops-rho.vercel.app">
-    Open the live Flow application
-  </a>
+  <a href="https://flow-ops-rho.vercel.app">Open the live Flow application</a>
 </p>
 
 > [!NOTE]
-> The clickable preview uses `assets/branding/flow-walkthrough-thumbnail.jpeg`. Keep that image in the repository beside `FLOW.mp4` so GitHub can show the walkthrough preview directly inside the README.
+> This section intentionally uses a remote YouTube preview because it is visible in a GitHub README and does not depend on a missing local thumbnail file. The repository copy of the walkthrough remains available at `assets/branding/FLOW.mp4`.
 
 ---
 
-## Flow Today
+## Flow as a Product
 
-| Customer experience | Operations workspace | Business control |
-| --- | --- | --- |
-| Public outlet QR ordering, table context, and safe order tracking | Counter, Kitchen, and Floor & Service each own a distinct part of the workflow | Owner visibility, lifecycle evidence, audit records, and controlled operational decisions |
+Flow is a food-business operational command system. It does not stop when a customer submits an order. It turns that order into controlled, role-specific work—then preserves the evidence needed to understand what happened.
 
-> **Flow is not just a menu or POS screen. It is the operational layer that turns customer demand into accountable staff work and business truth.**
+| Customer | Counter | Kitchen | Floor & Service | Owner / Manager |
+| --- | --- | --- | --- | --- |
+| Browse a safe public menu, submit a permitted order, and track only their own order | Review pay-at-counter work, record demo settlement, and authorise release | Work only the station queue assigned to them | Create table orders, see ready work, and record service | See operations, records, risks, and exceptions without becoming every team member’s workspace |
 
-### Built for the way food businesses actually operate
+> **One customer order becomes accountable work across Counter, Kitchen, Floor & Service, and owner oversight—without collapsing payment, release, preparation, fulfilment, and closure into one vague status.**
 
-- **Customers** need a simple, mobile-first way to browse, submit permitted orders, and see only safe order status.
-- **Counter staff** need a normal workspace for settlement and authorised release—not an owner dashboard.
-- **Kitchen staff** need only the station work they own, with a clear preparation lifecycle.
-- **Floor & Service** needs a ready-to-serve queue and controlled served confirmation.
-- **Owners and managers** need to understand what is happening without taking over every operational task.
+### What makes Flow different
+
+| Ordinary ordering tool | Flow operational model |
+| --- | --- |
+| Captures an order | Routes accountable work |
+| Shows one generic status | Keeps payment, release, Kitchen, fulfilment, and closure separate |
+| Gives broad access | Enforces role, outlet, and station scope |
+| Records activity | Preserves evidence and operational records |
+| Focuses on transactions | Builds toward controlled operational decisions |
+
+> **Flow is not another menu website or generic POS screen. It is the operational layer between customer demand, staff execution, and accountable business control.**
 
 ---
 
@@ -129,16 +135,16 @@ flowchart LR
 
 > **Payment, release, Kitchen progress, fulfilment, and closure are separate business truths. Flow does not hide them behind one misleading generic status.**
 
-### The current operating rules
+### Current operating rules
 
-| Step | What happens | Who owns it |
+| Step | What happens | Primary owner |
 | --- | --- | --- |
-| Public order | A customer enters through an outlet or table-scoped public route and receives only safe context | Customer |
+| Public order | Customer enters an outlet- or table-scoped public route and receives only safe context | Customer |
 | Settlement | Pay-at-counter orders remain unpaid until authorised staff record settlement | Counter |
-| Release | Settlement alone does not start Kitchen work; authorised release is a separate action | Counter |
-| Preparation | Kitchen progresses only its assigned station work: `NEW → ACCEPTED → PREPARING → READY` | Kitchen |
+| Release | Settlement alone does not start Kitchen work; authorised release is separate | Counter |
+| Preparation | Kitchen progresses assigned station work: `NEW → ACCEPTED → PREPARING → READY` | Kitchen |
 | Service | Ready dine-in work becomes served through Floor & Service | Floor & Service |
-| Oversight | Owner and manager views surface work, records, risks, and exceptions | Owner / Manager |
+| Oversight | Owners and managers see work, records, risks, and exceptions | Owner / Manager |
 
 ---
 
@@ -154,7 +160,7 @@ flowchart LR
 
 ### Counter, Kitchen, and Floor & Service
 
-- **Counter** supports the normal QR pay-at-counter workflow: queue visibility, manual demo settlement, and authorised release.
+- **Counter** supports QR pay-at-counter work: queue visibility, manual demo settlement, and authorised release.
 - **Kitchen** is station-aware and stops at `READY`; it cannot settle, release, serve, collect, or close orders.
 - **Floor & Service** supports table-service ordering, a ready-to-serve queue, and served confirmation.
 - **Dashboard** is for oversight, evidence, risks, and exceptions—not the normal Counter payment/release queue.
@@ -162,7 +168,7 @@ flowchart LR
 ### Business foundations
 
 - Protected private workspaces and Supabase authentication foundation.
-- Tenant and outlet boundaries with Row Level Security migration foundation.
+- Tenant and outlet boundaries with a Row Level Security migration foundation.
 - F&B demo tenant, menu, table, station, and operational seed data.
 - Table ordering, Kitchen board, inventory-backed order flow, and safe public tracking.
 - Owner dashboard and Flow Connect communication foundation.
@@ -221,7 +227,7 @@ Password: 123456
 > **Outlet and station scope**  
 > Operational access is restricted to the correct outlet and Kitchen station.
 
-> **Public QR boundaries**  
+> **Safe public QR boundaries**  
 > Public tokens expose only the minimum customer-facing context.
 
 > **Lifecycle truth**  
