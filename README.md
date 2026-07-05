@@ -16,15 +16,6 @@
   Flow connects public ordering, Counter, Kitchen, Floor &amp; Service, and owner oversight
   into one role-aware operating system for food businesses.
 </p>
-
-<p align="center">
-  <a href="https://flow-ops-rho.vercel.app">
-    <img
-      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
-      alt="Open the live Flow application use "
-    >
-    acc : owner@brewbite.demo / 123456 for demo only
-  </a>
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
       src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-PLAY%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
@@ -34,6 +25,15 @@
 </p>
 
 <p align="center">
+  <a href="https://flow-ops-rho.vercel.app">
+    <img
+      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
+      alt="Open the live Flow application use "
+    >
+  </a>
+  acc : owner@brewbite.demo / 123456 for demo only
+<p align="center">
+  
   <img src="https://img.shields.io/badge/Next.js-16-111111?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 16">
   <img src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict">
