@@ -16,23 +16,21 @@
   Flow connects public ordering, Counter, Kitchen, Floor &amp; Service, and owner oversight
   into one role-aware operating system for food businesses.
 </p>
+
+<p align="center">
+  <a href="https://flow-ops-rho.vercel.app">
+    <img
+      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
+      alt="Open the live Flow application"
+    >
+  </a>
+  acc info for demo ONLY : owner@brewbite.demo / 123456
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
       src="https://img.shields.io/badge/PRODUCT%20WALKTHROUGH-PLAY%20ON%20YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
       alt="Play the Flow product walkthrough on YouTube"
     >
   </a>
-</p>
-
-  
-  <img src="https://img.shields.io/badge/Next.js-16-111111?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 16">
-  <img src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict">
-  <img src="https://img.shields.io/badge/Supabase-RLS-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase RLS">
-  <img src="https://img.shields.io/badge/Vitest-tests-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest">
-</p>
-
-<p align="center">
   <a href="./LICENSE">
     <img
       src="https://img.shields.io/badge/License-Apache--2.0-3B82F6?style=for-the-badge&logo=apache&logoColor=white"
@@ -42,18 +40,22 @@
 </p>
 
 <p align="center">
-  <a href="https://flow-ops-rho.vercel.app">
-    <img
-      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
-      alt="Open the live Flow application use "
-    >
-  </a>
+  <img src="https://img.shields.io/badge/Next.js-16-111111?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 16">
+  <img src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict">
+  <img src="https://img.shields.io/badge/Supabase-RLS-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase RLS">
+  <img src="https://img.shields.io/badge/Vitest-tests-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest">
+</p>
+
 <p align="center">
-  
-  <p align="center">
-  acc : owner@brewbite.demo / 123456 for demo only
-  <p align="center">
-  
+  <strong>Demo access:</strong>
+  <code>owner@brewbite.demo</code>
+  &nbsp;·&nbsp;
+  <code>123456</code>
+  <br>
+  <sub>Demo environment only — do not reuse these credentials outside the BrewBite demonstration environment.</sub>
+</p>
+
 <p align="center">
   <a href="#watch-flow-in-action">Watch</a>
   ·
@@ -66,6 +68,8 @@
   <a href="#product-maturity-roadmap">Roadmap</a>
   ·
   <a href="#run-locally">Run Locally</a>
+  ·
+  <a href="#license">License</a>
 </p>
 
 ---
@@ -74,11 +78,11 @@
 
 > Follow a Flow order from public QR entry to Counter, Kitchen, Floor & Service, and owner oversight.
 
-<!-- This preview uses YouTube's hosted thumbnail. It does not require any local thumbnail asset. -->
+<!-- Uses YouTube's hosted thumbnail so no extra image file is required in this repository. -->
 <p align="center">
   <a href="https://youtu.be/0StGxEYKGZY" title="Click to play the full Flow walkthrough on YouTube">
     <img
-      src="https://img.youtube.com/vi/0StGxEYKGZY/maxresdefault.jpg"
+      src="https://i.ytimg.com/vi/0StGxEYKGZY/hqdefault.jpg"
       alt="Flow product walkthrough preview — click to play on YouTube"
       width="900"
     >
@@ -88,8 +92,8 @@
 <p align="center">
   <a href="https://youtu.be/0StGxEYKGZY">
     <img
-      src="https://img.shields.io/badge/%E2%96%B6%20CLICK%20THE%20PREVIEW%20TO%20PLAY-FLOW%20WALKTHROUGH-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
-      alt="Click the preview to play the Flow walkthrough"
+      src="https://img.shields.io/badge/%E2%96%B6%20PLAY%20THE%20WALKTHROUGH-CLICK%20THE%20PREVIEW%20ABOVE-FF0000?style=for-the-badge&logo=youtube&logoColor=white"
+      alt="Play the Flow product walkthrough"
     >
   </a>
 </p>
@@ -103,7 +107,7 @@
 </p>
 
 > [!NOTE]
-> This section intentionally uses a remote YouTube preview because it is visible in a GitHub README and does not depend on a missing local thumbnail file. The repository copy of the walkthrough remains available at `assets/branding/FLOW.mp4`.
+> The preview above is clickable and opens the full walkthrough on YouTube. It uses a YouTube-hosted thumbnail, so this README does not depend on an extra local preview image. The repository copy remains available at `assets/branding/FLOW.mp4`.
 
 ---
 
@@ -426,10 +430,6 @@ flow/
 5. The product should explain operational reality with evidence, not vague automation.
 6. Flow should feel like a real operating system for food businesses, not a collection of disconnected screens.
 
-<p align="center">
-  <strong>BUILD THE TRUTH. ROUTE THE WORK. PROVE THE VALUE.</strong>
-</p>
-
 ---
 
 ## License
@@ -447,76 +447,37 @@ Copyright © 2026 AbasSec.
 
 Flow is released under the [Apache License 2.0](LICENSE).
 
-Apache-2.0 is a permissive open-source license. It allows you to use, copy, modify, distribute, sublicense, and build commercial products from this repository, provided that you follow the license terms and preserve applicable copyright, attribution, patent, and license notices.
+### What this allows
 
-### What You May Do
+The Apache License 2.0 permits you to:
 
-Under the Apache License 2.0, you may:
+- Use Flow for personal, academic, research, hackathon, internal, or commercial work.
+- Copy, fork, modify, and redistribute Flow in source or compiled form.
+- Build products, services, extensions, integrations, or deployments based on Flow.
+- Add your own copyright notices to your original modifications.
 
-- Use Flow for personal, academic, hackathon, research, internal, or commercial projects.
-- Fork the repository and adapt it for another business workflow or industry.
-- Modify the source code, documentation, interfaces, database structure, and deployment setup.
-- Redistribute Flow or derivative versions in source or compiled form.
-- Build hosted products, integrations, extensions, or commercial services based on Flow.
-- Add your own copyright notices to your modifications.
+### What redistribution requires
 
-### What You Must Do
-
-When redistributing Flow or a modified version of Flow, you must:
+When you distribute Flow or a modified version of Flow, you must:
 
 - Include a copy of the [Apache License 2.0](LICENSE).
-- Retain applicable copyright, patent, trademark, and attribution notices.
-- Clearly state when you have modified source files.
-- Preserve any required notices included with the project.
-- Avoid presenting your modified version as the official Flow project unless authorised by the project owner.
+- Retain applicable copyright, patent, and license notices.
+- State significant changes made to files when required by the license.
+- Preserve any required notices that accompany the project.
 
-### Branding and Product Identity
+### Branding and demo notice
 
-The Apache License applies to the source code and project materials covered by the repository license.
+Please use the Flow name, logo, and product identity accurately. Do not present a fork, modified version, or separate deployment as the official Flow product or imply endorsement by AbasSec without permission.
 
-The **Flow** name, logo, visual identity, demo branding, and product presentation should not be used in a way that suggests endorsement, partnership, or official ownership by AbasSec unless permission has been granted.
+The BrewBite data, walkthrough, public demo, and demonstration credentials are provided for evaluation and testing. They are not a substitute for production payment processing, data protection, legal compliance, operational security, or deployment hardening.
 
-You may accurately describe your work as:
+### No warranty
 
-> “Based on Flow”  
-> “Built using Flow”  
-> “A modified version of Flow”
+Flow is provided under the Apache License 2.0 on an **“AS IS”** basis, without warranties or conditions of any kind. Before any real business deployment, conduct appropriate security review, data-protection review, operational testing, backup planning, and legal/compliance assessment.
 
-You should not represent a fork or modified release as the official Flow product.
+### Full legal text
 
-### Demo Environment Notice
-
-Any public deployment, walkthrough video, sample menu, BrewBite data, seeded users, or demonstration credentials in this repository are intended only for evaluation, development, hackathon demonstration, and testing.
-
-Do not use demo credentials, sample accounts, seed data, or public endpoints as a substitute for production security, production payment processing, customer-data handling, legal compliance, or commercial operational controls.
-
-### No Warranty
-
-Flow is provided under the Apache License 2.0 on an **“AS IS”** basis, without warranties or conditions of any kind, either express or implied.
-
-This includes, without limitation, no warranty of:
-
-- merchantability,
-- fitness for a particular purpose,
-- uninterrupted availability,
-- security suitability for a production environment,
-- legal or regulatory compliance,
-- payment-provider compatibility,
-- data-loss prevention,
-- financial accuracy,
-- or suitability for a specific restaurant, café, outlet, or business workflow.
-
-Before using Flow in a real business environment, you are responsible for your own security review, legal review, privacy controls, payment-provider validation, data protection measures, operational testing, backup strategy, and deployment hardening.
-
-### Contributions
-
-By submitting a pull request, code contribution, documentation improvement, issue fix, or other contribution intended for inclusion in Flow, you agree that your contribution may be distributed under the Apache License 2.0, unless you clearly state otherwise before submission.
-
-### Full License Text
-
-The complete legal terms are available in the root [LICENSE](LICENSE) file.
-
-For the official Apache License 2.0 text and SPDX identifier, see the Apache Software Foundation’s license reference. :contentReference[oaicite:0]{index=0}
+Read the complete legally binding terms in the root [LICENSE](LICENSE) file.
 
 ---
 
