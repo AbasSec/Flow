@@ -415,3 +415,97 @@ flow/
 <p align="center">
   <strong>BUILD THE TRUTH. ROUTE THE WORK. PROVE THE VALUE.</strong>
 </p>
+
+---
+
+## License
+
+<p align="center">
+  <a href="./LICENSE">
+    <img
+      src="https://img.shields.io/badge/License-Apache--2.0-3B82F6?style=for-the-badge&logo=apache&logoColor=white"
+      alt="Licensed under Apache License 2.0"
+    >
+  </a>
+</p>
+
+Copyright © 2026 AbasSec.
+
+Flow is released under the [Apache License 2.0](LICENSE).
+
+Apache-2.0 is a permissive open-source license. It allows you to use, copy, modify, distribute, sublicense, and build commercial products from this repository, provided that you follow the license terms and preserve applicable copyright, attribution, patent, and license notices.
+
+### What You May Do
+
+Under the Apache License 2.0, you may:
+
+- Use Flow for personal, academic, hackathon, research, internal, or commercial projects.
+- Fork the repository and adapt it for another business workflow or industry.
+- Modify the source code, documentation, interfaces, database structure, and deployment setup.
+- Redistribute Flow or derivative versions in source or compiled form.
+- Build hosted products, integrations, extensions, or commercial services based on Flow.
+- Add your own copyright notices to your modifications.
+
+### What You Must Do
+
+When redistributing Flow or a modified version of Flow, you must:
+
+- Include a copy of the [Apache License 2.0](LICENSE).
+- Retain applicable copyright, patent, trademark, and attribution notices.
+- Clearly state when you have modified source files.
+- Preserve any required notices included with the project.
+- Avoid presenting your modified version as the official Flow project unless authorised by the project owner.
+
+### Branding and Product Identity
+
+The Apache License applies to the source code and project materials covered by the repository license.
+
+The **Flow** name, logo, visual identity, demo branding, and product presentation should not be used in a way that suggests endorsement, partnership, or official ownership by AbasSec unless permission has been granted.
+
+You may accurately describe your work as:
+
+> “Based on Flow”  
+> “Built using Flow”  
+> “A modified version of Flow”
+
+You should not represent a fork or modified release as the official Flow product.
+
+### Demo Environment Notice
+
+Any public deployment, walkthrough video, sample menu, BrewBite data, seeded users, or demonstration credentials in this repository are intended only for evaluation, development, hackathon demonstration, and testing.
+
+Do not use demo credentials, sample accounts, seed data, or public endpoints as a substitute for production security, production payment processing, customer-data handling, legal compliance, or commercial operational controls.
+
+### No Warranty
+
+Flow is provided under the Apache License 2.0 on an **“AS IS”** basis, without warranties or conditions of any kind, either express or implied.
+
+This includes, without limitation, no warranty of:
+
+- merchantability,
+- fitness for a particular purpose,
+- uninterrupted availability,
+- security suitability for a production environment,
+- legal or regulatory compliance,
+- payment-provider compatibility,
+- data-loss prevention,
+- financial accuracy,
+- or suitability for a specific restaurant, café, outlet, or business workflow.
+
+Before using Flow in a real business environment, you are responsible for your own security review, legal review, privacy controls, payment-provider validation, data protection measures, operational testing, backup strategy, and deployment hardening.
+
+### Contributions
+
+By submitting a pull request, code contribution, documentation improvement, issue fix, or other contribution intended for inclusion in Flow, you agree that your contribution may be distributed under the Apache License 2.0, unless you clearly state otherwise before submission.
+
+### Full License Text
+
+The complete legal terms are available in the root [LICENSE](LICENSE) file.
+
+For the official Apache License 2.0 text and SPDX identifier, see the Apache Software Foundation’s license reference. :contentReference[oaicite:0]{index=0}
+
+---
+
+<p align="center">
+  <strong>BUILD THE TRUTH. ROUTE THE WORK. PROVE THE VALUE.</strong>
+</p>
