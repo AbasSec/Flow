@@ -10,7 +10,7 @@ import {
   getOutletLifecycleModeForContext,
   type OrderSummary
 } from "@/lib/services/orders";
-import { getFirstTableQrSource } from "@/lib/services/public-ordering";
+import { getOutletQrSource } from "@/lib/services/public-ordering";
 import { LifecycleActivationPanel } from "./lifecycle-panel";
 
 export const dynamic = "force-dynamic";
@@ -113,9 +113,6 @@ function getTrustedPublicOrigin(requestHeaders: { get(name: string): string | nu
   return PRODUCTION_PUBLIC_ORIGIN;
 }
 
-function isValidPublicTableToken(token: string | null | undefined): token is string {
-  return Boolean(token && /^[A-Za-z0-9_-]{32,128}$/.test(token));
-}
 
 export default async function AppPage() {
   const result = await getDashboardData();
@@ -143,14 +140,14 @@ export default async function AppPage() {
           r.ok ? r.data : null
         )
       : null;
-  const tableQrSource = await getFirstTableQrSource(data.context.orgId);
+  const outletQrSource = await getOutletQrSource(data.context.orgId);
   const requestHeaders = await headers();
   const origin = getTrustedPublicOrigin(requestHeaders);
-  const tableQrUrl = isValidPublicTableToken(tableQrSource?.tableToken)
-    ? `${origin}/t/${tableQrSource.tableToken}`
+  const outletQrUrl = outletQrSource
+    ? `${origin}/o/${outletQrSource.outletToken}`
     : null;
-  const tableQrDataUrl = tableQrUrl
-    ? await QRCode.toDataURL(tableQrUrl, {
+  const outletQrDataUrl = outletQrUrl
+    ? await QRCode.toDataURL(outletQrUrl, {
         margin: 1,
         scale: 5,
         color: {
@@ -278,46 +275,47 @@ export default async function AppPage() {
       <Surface className="overflow-hidden">
         <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="bg-[#17211b] p-5 text-white sm:p-6">
-            <Badge tone="dark">Public table ordering</Badge>
-            <h2 className="mt-4 text-2xl font-semibold">Table QR</h2>
+            <Badge tone="dark">Public outlet ordering</Badge>
+            <h2 className="mt-4 text-2xl font-semibold">Outlet QR</h2>
             <p className="mt-3 text-sm leading-6 text-[#dfe7da]">
-              Scan to open the customer menu for one BrewBite table. Orders are
-              received for pay-at-counter settlement before kitchen release.
+              One QR for this outlet. Customers scan once, select their table,
+              and place a pay-at-counter order. The server validates that the
+              selected table belongs to this outlet before accepting the order.
             </p>
           </div>
           <div>
-            {tableQrSource && tableQrDataUrl && tableQrUrl ? (
+            {outletQrSource && outletQrDataUrl && outletQrUrl ? (
               <div className="grid gap-5 p-5 sm:grid-cols-[176px_1fr] sm:items-center sm:p-6">
                 <Image
-                  alt={`QR code for ${tableQrSource.tableLabel}`}
+                  alt="Outlet ordering QR code"
                   className="h-44 w-44 border border-[#d7d2c4] bg-white p-2 shadow-sm"
                   height={176}
-                  src={tableQrDataUrl}
+                  src={outletQrDataUrl}
                   unoptimized
                   width={176}
                 />
                 <div className="min-w-0">
-                  <Badge tone="success">{tableQrSource.tableLabel}</Badge>
+                  <Badge tone="success">One QR for your outlet</Badge>
                   <p className="mt-3 text-sm font-semibold text-[#344033]">
-                    Open customer menu
+                    Open customer ordering
                   </p>
                   <a
                     className="mt-2 inline-flex min-h-11 max-w-full items-center border border-[#ebe7dc] bg-[#faf9f4] px-3 py-2 text-sm font-semibold text-[#263128] outline-none transition hover:border-[#17211b] focus-visible:ring-2 focus-visible:ring-[#17211b]"
-                    href={tableQrUrl}
+                    href={outletQrUrl}
                   >
-                    <span className="truncate">Open table link</span>
+                    <span className="truncate">Open outlet ordering link</span>
                   </a>
                   <p className="mt-3 text-xs leading-5 text-[#667064]">
-                    Use the QR code for the live demo, or open the link on this
-                    device if scanning is unavailable. The public page shows
-                    only safe table, menu, and pay-at-counter context.
+                    Customers scan once, select their table, and order. Pay at
+                    the counter before kitchen preparation starts. The public
+                    page shows only safe outlet, menu, and pay-at-counter context.
                   </p>
                 </div>
               </div>
             ) : (
               <p className="p-5 text-sm text-[#667064] sm:p-6">
-                Table QR links will appear here after the public QR migration is
-                approved and applied.
+                Outlet QR links will appear here after the V3.2 migration is
+                applied.
               </p>
             )}
           </div>
