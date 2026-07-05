@@ -24,15 +24,6 @@
   </a>
 </p>
 
-<p align="center">
-  <a href="https://flow-ops-rho.vercel.app">
-    <img
-      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
-      alt="Open the live Flow application use "
-    >
-  </a>
-  acc : owner@brewbite.demo / 123456 for demo only
-<p align="center">
   
   <img src="https://img.shields.io/badge/Next.js-16-111111?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 16">
   <img src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white" alt="React 19">
@@ -50,6 +41,16 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="https://flow-ops-rho.vercel.app">
+    <img
+      src="https://img.shields.io/badge/LIVE%20APP-OPEN%20FLOW-16A34A?style=for-the-badge&logo=rocket&logoColor=white"
+      alt="Open the live Flow application use "
+    >
+  </a>
+<p align="center">
+  acc : owner@brewbite.demo / 123456 for demo only
+  
 <p align="center">
   <a href="#watch-flow-in-action">Watch</a>
   ·
