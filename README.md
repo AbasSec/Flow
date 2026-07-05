@@ -74,7 +74,7 @@
   &nbsp;·&nbsp;
   <a href="https://youtu.be/0StGxEYKGZY">Watch on YouTube</a>
   &nbsp;·&nbsp;
-  <a href="https://flow-ops-rho.vercel.app">Open the live Flow application</a>
+  <a href="https://flow-ops-rho.vercel.app">Open the live Flow application and use these as login info , acc : owner@brewbite.demo , 123456 </a>
 </p>
 
 > [!NOTE]
