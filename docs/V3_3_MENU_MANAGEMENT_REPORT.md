@@ -61,6 +61,8 @@ All management RPCs: `SECURITY DEFINER`, `set search_path = pg_catalog, pg_temp`
 
 Category archive is blocked with a clear exception if any active items remain. Item archive uses soft-delete only (`is_active = false`); the `menu_item_id` FK has `ON DELETE RESTRICT` in `order_lines` — hard deletion would violate referential integrity regardless.
 
+**Staff-facing wording:** The UI labels these actions "Remove from menu" and "Remove category from menu" rather than "Archive", and includes the note: *"Removing from the menu safely hides the item or category from active menus while preserving order history, reports, and audit records."* The underlying action names (`archiveItemAction`, `archiveCategoryAction`) and RPC names are unchanged.
+
 ## Application Implementation
 
 ### `lib/services/menu-management.ts`
