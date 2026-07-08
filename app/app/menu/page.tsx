@@ -87,6 +87,10 @@ export default async function MenuPage() {
               Add category
             </button>
           </form>
+          <p className="mt-3 text-xs text-[#667064]">
+            Removing from the menu safely hides the item or category from active menus while
+            preserving order history, reports, and audit records.
+          </p>
         </Surface>
       )}
 
@@ -142,7 +146,7 @@ function CategorySection({
                   className="min-h-9 border border-[#d98a76] px-3 text-xs font-semibold text-[#9b3a26] hover:bg-[#fdf4f2]"
                   type="submit"
                 >
-                  Archive category
+                  Remove category from menu
                 </button>
               </form>
             )}
@@ -251,7 +255,7 @@ function CategorySection({
                       className="min-h-9 border border-[#d98a76] px-3 text-xs font-semibold text-[#9b3a26] hover:bg-[#fdf4f2]"
                       type="submit"
                     >
-                      Archive
+                      Remove from menu
                     </button>
                   </form>
                 )}
