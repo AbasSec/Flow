@@ -8,6 +8,12 @@ const COUNTER_VISIBLE_ROLES = new Set([
   "cashier"
 ]);
 
+const MENU_VISIBLE_ROLES = new Set([
+  "organisation_owner",
+  "organisation_admin",
+  "manager"
+]);
+
 export function AppShell({
   title,
   subtitle,
@@ -22,6 +28,7 @@ export function AppShell({
   reserveCounterSlot?: boolean;
 }) {
   const showCounter = Boolean(role && COUNTER_VISIBLE_ROLES.has(role));
+  const showMenu = Boolean(role && MENU_VISIBLE_ROLES.has(role));
   const showCounterPlaceholder = !showCounter && reserveCounterSlot;
 
   return (
@@ -54,6 +61,7 @@ export function AppShell({
             <NavLink href="/app/waiter">Floor & Service</NavLink>
             <NavLink href="/app/kitchen">Kitchen</NavLink>
             <NavLink href="/app/connect">Connect</NavLink>
+            {showMenu && <NavLink href="/app/menu">Menu</NavLink>}
           </nav>
         </header>
         {children}
