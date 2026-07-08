@@ -27,6 +27,11 @@ const flowUi = readFileSync(
   "utf8"
 );
 
+const loading = readFileSync(
+  join(process.cwd(), "app", "app", "loading.tsx"),
+  "utf8"
+);
+
 // ── Migration: schema additions ───────────────────────────────────────────────
 
 describe("V3.3 migration: schema additions", () => {
@@ -421,5 +426,48 @@ describe("V3.3 navigation: flow-ui.tsx", () => {
     expect(menuRoles).not.toContain("cashier");
     expect(menuRoles).not.toContain("waiter");
     expect(menuRoles).not.toContain("kitchen");
+  });
+});
+
+// ── Loading shell: nav slot preservation ─────────────────────────────────────
+
+describe("V3.3 loading shell: Menu nav slot", () => {
+  it("AppShell accepts reserveMenuSlot prop to reserve the Menu nav slot", () => {
+    expect(flowUi).toContain("reserveMenuSlot");
+    expect(flowUi).toContain("MenuNavPlaceholder");
+    expect(flowUi).toContain("showMenuPlaceholder");
+  });
+
+  it("loading screen reserves both Counter and Menu nav slots", () => {
+    expect(loading).toContain("reserveCounterSlot");
+    expect(loading).toContain("reserveMenuSlot");
+  });
+
+  it("Menu placeholder is non-clickable (span element, no href)", () => {
+    const fnStart = flowUi.indexOf("function MenuNavPlaceholder");
+    expect(fnStart, "MenuNavPlaceholder function not found").toBeGreaterThan(-1);
+    const fnBody = flowUi.slice(fnStart, fnStart + 400);
+    expect(fnBody).not.toContain("href");
+    expect(fnBody).not.toContain("<Link");
+    expect(fnBody).not.toContain("<a ");
+  });
+
+  it("real Menu NavLink is role-gated: only shown when showMenu is true", () => {
+    expect(flowUi).toContain("MENU_VISIBLE_ROLES.has(role)");
+    const menuLinkIdx = flowUi.indexOf('href="/app/menu"');
+    expect(menuLinkIdx, "/app/menu href not found").toBeGreaterThan(-1);
+    const surroundingCode = flowUi.slice(menuLinkIdx - 200, menuLinkIdx + 50);
+    expect(surroundingCode).toContain("showMenu");
+  });
+
+  it("Counter placeholder behavior is unchanged", () => {
+    expect(flowUi).toContain("reserveCounterSlot");
+    expect(flowUi).toContain("CounterNavPlaceholder");
+    expect(flowUi).toContain("showCounterPlaceholder");
+    const fnStart = flowUi.indexOf("function CounterNavPlaceholder");
+    expect(fnStart, "CounterNavPlaceholder function not found").toBeGreaterThan(-1);
+    const fnBody = flowUi.slice(fnStart, fnStart + 250);
+    expect(fnBody).not.toContain("href");
+    expect(fnBody).not.toContain("<Link");
   });
 });

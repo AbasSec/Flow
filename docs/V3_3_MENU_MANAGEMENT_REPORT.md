@@ -31,6 +31,8 @@ Sold-out items are blocked at two layers:
 
 2. **`flow_m4_create_qr_table_order`** — `AND NOT mi.is_sold_out` in the temporary table join ensures sold-out items cannot be submitted even if a customer forges a request. If submitted quantity doesn't match available items, the order is rejected with "Invalid order request". `flow_m4_create_outlet_qr_order` (V3.2) delegates to this function unchanged — one fix covers both routes.
 
+**Note on stock-driven unavailability:** Clearing the sold-out flag (`is_sold_out = false`) makes an item eligible again, but `flow_m4_public_item_available` also runs the ingredient stock check. If the item's recipe requires an ingredient whose current stock is insufficient, the function will still return `false` and the item will appear unavailable on the public menu — even after a manager has cleared the sold-out flag. This is expected and correct: the sold-out flag is an explicit operator override; the stock check is an automatic constraint independent of it. Both must pass for an item to be publicly orderable.
+
 ## Migration Summary
 
 One new migration: `supabase/migrations/20260707000100_v3_3_menu_management.sql`
