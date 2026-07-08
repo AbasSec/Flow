@@ -4,6 +4,7 @@ export default function Loading() {
   return (
     <AppShell
       reserveCounterSlot
+      reserveMenuSlot
       subtitle="Refreshing committed database state."
       title="Loading Flow"
     >
