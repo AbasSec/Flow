@@ -8,21 +8,31 @@ const COUNTER_VISIBLE_ROLES = new Set([
   "cashier"
 ]);
 
+const MENU_VISIBLE_ROLES = new Set([
+  "organisation_owner",
+  "organisation_admin",
+  "manager"
+]);
+
 export function AppShell({
   title,
   subtitle,
   children,
   role,
-  reserveCounterSlot = false
+  reserveCounterSlot = false,
+  reserveMenuSlot = false
 }: {
   title: string;
   subtitle: string;
   children: ReactNode;
   role?: string;
   reserveCounterSlot?: boolean;
+  reserveMenuSlot?: boolean;
 }) {
   const showCounter = Boolean(role && COUNTER_VISIBLE_ROLES.has(role));
+  const showMenu = Boolean(role && MENU_VISIBLE_ROLES.has(role));
   const showCounterPlaceholder = !showCounter && reserveCounterSlot;
+  const showMenuPlaceholder = !showMenu && reserveMenuSlot;
 
   return (
     <main className="min-h-screen bg-[#f5f2e9] text-[#17211b]">
@@ -54,11 +64,24 @@ export function AppShell({
             <NavLink href="/app/waiter">Floor & Service</NavLink>
             <NavLink href="/app/kitchen">Kitchen</NavLink>
             <NavLink href="/app/connect">Connect</NavLink>
+            {showMenu && <NavLink href="/app/menu">Menu</NavLink>}
+            {showMenuPlaceholder && <MenuNavPlaceholder />}
           </nav>
         </header>
         {children}
       </div>
     </main>
+  );
+}
+
+function MenuNavPlaceholder() {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex min-h-11 items-center justify-center border border-[#d7d2c4] bg-[#ece7da] px-4 py-2 shadow-sm"
+    >
+      <span className="h-3 w-12 bg-[#d7d2c4]" />
+    </span>
   );
 }
 
