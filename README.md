@@ -81,11 +81,10 @@
 
 > Follow a Flow order from public QR entry to Counter, Kitchen, Floor & Service, and owner oversight.
 
-<!-- Uses YouTube's hosted thumbnail so no extra image file is required in this repository. -->
 <p align="center">
   <a href="https://youtu.be/0StGxEYKGZY" title="Click to play the full Flow walkthrough on YouTube">
     <img
-      src="https://i.ytimg.com/vi/0StGxEYKGZY/hqdefault.jpg"
+      src="./assets/branding/flow-walkthrough-thumbnail.jpeg"
       alt="Flow product walkthrough preview — click to play on YouTube"
       width="900"
     >
@@ -110,7 +109,7 @@
 </p>
 
 > [!NOTE]
-> The preview above is clickable and opens the full walkthrough on YouTube. It uses a YouTube-hosted thumbnail, so this README does not depend on an extra local preview image. The repository copy remains available at `assets/branding/FLOW.mp4`.
+> The preview above is clickable and opens the full walkthrough on YouTube. It uses the repository walkthrough thumbnail at `assets/branding/flow-walkthrough-thumbnail.jpeg`. The repository copy remains available at `assets/branding/FLOW.mp4`.
 
 ---
 
