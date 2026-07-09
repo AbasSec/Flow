@@ -14,13 +14,20 @@ const MENU_VISIBLE_ROLES = new Set([
   "manager"
 ]);
 
+const TEAM_VISIBLE_ROLES = new Set([
+  "organisation_owner",
+  "organisation_admin",
+  "manager"
+]);
+
 export function AppShell({
   title,
   subtitle,
   children,
   role,
   reserveCounterSlot = false,
-  reserveMenuSlot = false
+  reserveMenuSlot = false,
+  reserveTeamSlot = false
 }: {
   title: string;
   subtitle: string;
@@ -28,11 +35,14 @@ export function AppShell({
   role?: string;
   reserveCounterSlot?: boolean;
   reserveMenuSlot?: boolean;
+  reserveTeamSlot?: boolean;
 }) {
   const showCounter = Boolean(role && COUNTER_VISIBLE_ROLES.has(role));
   const showMenu = Boolean(role && MENU_VISIBLE_ROLES.has(role));
+  const showTeam = Boolean(role && TEAM_VISIBLE_ROLES.has(role));
   const showCounterPlaceholder = !showCounter && reserveCounterSlot;
   const showMenuPlaceholder = !showMenu && reserveMenuSlot;
+  const showTeamPlaceholder = !showTeam && reserveTeamSlot;
 
   return (
     <main className="min-h-screen bg-[#f5f2e9] text-[#17211b]">
@@ -66,11 +76,24 @@ export function AppShell({
             <NavLink href="/app/connect">Connect</NavLink>
             {showMenu && <NavLink href="/app/menu">Menu</NavLink>}
             {showMenuPlaceholder && <MenuNavPlaceholder />}
+            {showTeam && <NavLink href="/app/team">Team</NavLink>}
+            {showTeamPlaceholder && <TeamNavPlaceholder />}
           </nav>
         </header>
         {children}
       </div>
     </main>
+  );
+}
+
+function TeamNavPlaceholder() {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex min-h-11 items-center justify-center border border-[#d7d2c4] bg-[#ece7da] px-4 py-2 shadow-sm"
+    >
+      <span className="h-3 w-10 bg-[#d7d2c4]" />
+    </span>
   );
 }
 
